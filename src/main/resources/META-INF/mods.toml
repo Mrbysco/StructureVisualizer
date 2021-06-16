@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="[35,)"
-#issueTrackerURL="https://github.com/Mrbysco/<MOD>/issues"
+issueTrackerURL="https://github.com/Mrbysco/StructureVisualizer"
 license="MIT"
 
 [[mods]]
