@@ -1,4 +1,4 @@
-package com.mrbysco.structurevisualizer.screen;
+package com.mrbysco.structurevisualizer.screen.widgets;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;

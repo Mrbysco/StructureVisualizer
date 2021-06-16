@@ -10,6 +10,8 @@
   "structurevisualizer.screen.selection.unload": "Unload",
   "structurevisualizer.screen.search": "Search",
   "structurevisualizer.screen.position": "Position",
+  "structurevisualizer.screen.mirror": "Mirror",
+  "structurevisualizer.screen.rotation": "Rotation",
   "structurevisualizer.screen.x": "X",
   "structurevisualizer.screen.y": "Y",
   "structurevisualizer.screen.z": "Z",

@@ -1,7 +1,8 @@
-package com.mrbysco.structurevisualizer.screen;
+package com.mrbysco.structurevisualizer.screen.widgets;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mrbysco.structurevisualizer.screen.StructureListWidget.ListEntry;
+import com.mrbysco.structurevisualizer.screen.TemplateSelectionScreen;
+import com.mrbysco.structurevisualizer.screen.widgets.StructureListWidget.ListEntry;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.list.ExtendedList;
 import net.minecraft.util.text.ITextComponent;
