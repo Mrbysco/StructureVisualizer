@@ -10,7 +10,7 @@ displayName="Structure Visualizer"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/structure-visualizer"
 authors="Mrbysco, ShyNieke"
 description='''
-Just take a peek.. :)
+Ah, so this is where I place that block
 '''
 [[dependencies.structurevisualizer]]
 modId="minecraft"
