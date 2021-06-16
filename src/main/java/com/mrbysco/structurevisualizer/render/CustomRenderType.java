@@ -35,6 +35,7 @@ public class CustomRenderType extends RenderType {
 					.setDepthTestState(LEQUAL_DEPTH_TEST)
 					.setCullState(NO_CULL)
 					.setWriteMaskState(COLOR_WRITE)
+					.setAlphaState(MIDWAY_ALPHA)
 					.createCompositeState(false)
 	);
 }

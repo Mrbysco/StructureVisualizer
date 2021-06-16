@@ -9,6 +9,7 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -107,7 +108,7 @@ public class RenderHandler {
 
 				IBakedModel ibakedmodel = dispatcher.getBlockModel(state);
 				BlockColors blockColors = minecraft.getBlockColors();
-				int color = blockColors.getColor(state, level, targetPos, 0);
+				int color = blockColors.getColor(state, templateWorld, targetPos, 0);
 
 				float f = (float) (color >> 16 & 255) / 255.0F;
 				float f1 = (float) (color >> 8 & 255) / 255.0F;
