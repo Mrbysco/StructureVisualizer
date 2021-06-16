@@ -91,7 +91,7 @@ public class TemplateSelectionScreen extends Screen {
 				new TranslationTextComponent("structurevisualizer.screen.selection.unload"), b -> {
 			RenderHandler.cachedTemplateName = "";
 			RenderHandler.cachedTemplate = null;
-			RenderHandler.blocksToRender.clear();
+			RenderHandler.templateWorld = null;
 			minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.unload"), Util.NIL_UUID);
 		}));
 		y -= 18 + PADDING;
@@ -105,10 +105,10 @@ public class TemplateSelectionScreen extends Screen {
 					RenderHandler.cachedTemplate = template;
 					RenderHandler.renderBuffer = null;
 					BlockPos pos = BlockPos.ZERO.offset(xPosField.getDouble() - (template.size.getX() / 2), yPosField.getDouble(), zPosField.getDouble() - (template.size.getZ() / 2));
-					TemplateHelper.setRenderInfo(template, minecraft.level, pos, pos, TemplateHelper.PLACEMENT_SETTINGS);
+					TemplateHelper.initializeTemplateWorld(template, minecraft.level, pos, pos, TemplateHelper.PLACEMENT_SETTINGS, 2);
 					minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.load", selectedTemplate).withStyle(TextFormatting.YELLOW), Util.NIL_UUID);
 				} else {
-					RenderHandler.blocksToRender.clear();
+					RenderHandler.templateWorld = null;
 					RenderHandler.renderBuffer = null;
 					minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.load.fail", selectedTemplate).withStyle(TextFormatting.RED), Util.NIL_UUID);
 				}

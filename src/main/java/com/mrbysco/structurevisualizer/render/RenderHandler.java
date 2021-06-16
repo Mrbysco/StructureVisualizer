@@ -4,9 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mrbysco.structurevisualizer.StructureVisualizer;
 import com.mrbysco.structurevisualizer.render.vbo.MultiVBORenderer;
-import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.block.Block;
-import net.minecraft.block.Block.RenderSideCacheKey;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -18,18 +16,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -42,7 +35,7 @@ public class RenderHandler {
 	public static String cachedTemplateName = "";
 	public static Template cachedTemplate = null;
 	public static boolean renderStructure = false;
-	public static Map<BlockPos, BlockState> blocksToRender = new HashMap<>();
+	public static FakeWorld templateWorld = null;
 
 	@SubscribeEvent
 	public void onRenderWorldLastEvent(RenderWorldLastEvent event) {
@@ -51,7 +44,9 @@ public class RenderHandler {
 			return;
 
 		if(renderStructure) {
-			if(blocksToRender.isEmpty()) {
+			if(templateWorld == null) {
+				cachedTemplateName = "";
+				cachedTemplate = null;
 				renderStructure = false;
 			} else {
 				final Minecraft minecraft = Minecraft.getInstance();
@@ -70,7 +65,7 @@ public class RenderHandler {
 
 	public void renderTemplate(MatrixStack poseStack, Vector3d cameraView, PlayerEntity player) {
 		tickTrack++;
-		BlockPos startPos = new BlockPos(0, 0, 0); //todo: Change pos accordingly
+		BlockPos startPos = BlockPos.ZERO;
 		if (renderBuffer != null && tickTrack < 300) {
 			if (tickTrack % 30 == 0) {
 				try {
@@ -102,7 +97,7 @@ public class RenderHandler {
 			MatrixStack stack = new MatrixStack(); //Create a new matrix stack for use in the buffer building process
 			stack.pushPose(); //Save position
 
-			for (Map.Entry<BlockPos, BlockState> entry : blocksToRender.entrySet()) {
+			for (Map.Entry<BlockPos, BlockState> entry : templateWorld.entrySet()) {
 				BlockPos targetPos = entry.getKey();
 				BlockState state = entry.getValue();
 
@@ -121,7 +116,7 @@ public class RenderHandler {
 					try {
 						if (state.getRenderShape() == BlockRenderType.MODEL) {
 							for (Direction direction : Direction.values()) {
-								if (shouldRenderFace(state, level, targetPos, direction) && !isSameBlock(state, targetPos, direction)) {
+								if (Block.shouldRenderFace(state, templateWorld, targetPos, direction) && !(templateWorld.getBlockState(targetPos.relative(direction)).getBlock().equals(state.getBlock()))) {
 									if (state.getMaterial().isSolidBlocking()) {
 										renderModelBrightnessColorQuads(stack.last(), builder, f, f1, f2, 0.8F, ibakedmodel.getQuads(state, direction, new Random(MathHelper.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
 									} else {
@@ -171,42 +166,5 @@ public class RenderHandler {
 
 			builder.addVertexData(matrixEntry, bakedquad, f, f1, f2, alpha, combinedLightsIn, combinedOverlayIn);
 		}
-	}
-
-	public static boolean shouldRenderFace(BlockState state, IWorldReader realLevel, BlockPos pos, Direction direction) {
-		BlockPos blockpos = pos.relative(direction);
-		if(!blocksToRender.isEmpty() && blocksToRender.containsKey(blockpos)) {
-			BlockState blockstate = blocksToRender.get(blockpos);
-			if (state.skipRendering(blockstate, direction)) {
-				return false;
-			} else if (blockstate.canOcclude()) {
-				Block.RenderSideCacheKey block$rendersidecachekey = new Block.RenderSideCacheKey(state, blockstate, direction);
-				Object2ByteLinkedOpenHashMap<RenderSideCacheKey> object2bytelinkedopenhashmap = Block.OCCLUSION_CACHE.get();
-				byte b0 = object2bytelinkedopenhashmap.getAndMoveToFirst(block$rendersidecachekey);
-				if (b0 != 127) {
-					return b0 != 0;
-				} else {
-					VoxelShape voxelshape = state.getFaceOcclusionShape(realLevel, pos, direction);
-					VoxelShape voxelshape1 = blockstate.getFaceOcclusionShape(realLevel, blockpos, direction.getOpposite());
-					boolean flag = VoxelShapes.joinIsNotEmpty(voxelshape, voxelshape1, IBooleanFunction.ONLY_FIRST);
-					if (object2bytelinkedopenhashmap.size() == 2048) {
-						object2bytelinkedopenhashmap.removeLastByte();
-					}
-
-					object2bytelinkedopenhashmap.putAndMoveToFirst(block$rendersidecachekey, (byte)(flag ? 1 : 0));
-					return flag;
-				}
-			}
-		}
-		return true;
-	}
-
-	public static boolean isSameBlock(BlockState state, BlockPos pos, Direction direction) {
-		BlockPos blockpos = pos.relative(direction);
-		if(!blocksToRender.isEmpty() && blocksToRender.containsKey(blockpos)) {
-			BlockState relativeState = blocksToRender.get(blockpos);
-			return relativeState.getBlock().equals(state.getBlock());
-		}
-		return false;
 	}
 }

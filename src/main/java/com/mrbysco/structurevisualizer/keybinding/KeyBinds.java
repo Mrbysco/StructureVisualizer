@@ -44,7 +44,7 @@ public class KeyBinds {
 		}
 
 		if (KEY_RENDER.consumeClick()) {
-			if(RenderHandler.blocksToRender.isEmpty()) {
+			if(RenderHandler.templateWorld == null) {
 				minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.render.fail"), Util.NIL_UUID);
 			} else {
 				RenderHandler.renderStructure = !RenderHandler.renderStructure;
