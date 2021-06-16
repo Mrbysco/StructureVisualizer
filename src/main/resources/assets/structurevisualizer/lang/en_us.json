@@ -3,6 +3,13 @@
   "category.structurevisualizer.main": "Structure Visualizer",
   "key.structurevisualizer.open": "Open Structure Menu",
   "key.structurevisualizer.render": "Toggle Render",
+  "key.structurevisualizer.x_down": "Move X Down",
+  "key.structurevisualizer.x_up": "Move X Up",
+  "key.structurevisualizer.y_down": "Move Y Down",
+  "key.structurevisualizer.y_up": "Move Y Up",
+  "key.structurevisualizer.z_down": "Move Z Down",
+  "key.structurevisualizer.z_up": "Move Z Up",
+  "key.structurevisualizer.coordinate": "Structure Coordinates",
 
   "_comment": "Screen",
   "structurevisualizer.screen.selection.title": "Structure Selection",
@@ -23,5 +30,6 @@
   "structurevisualizer.load": "Loaded template: %s",
   "structurevisualizer.load.fail": "Failed to load structure: %s",
   "structurevisualizer.list": "Structure list:",
-  "structurevisualizer.unload": "Unloaded Structure"
+  "structurevisualizer.unload": "Unloaded Structure",
+  "structurevisualizer.coordinates": "Structure is located at: X: %s, Y: %s, Z: %s"
 }

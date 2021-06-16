@@ -6,7 +6,7 @@ import com.mrbysco.structurevisualizer.screen.widgets.EnumButton;
 import com.mrbysco.structurevisualizer.screen.widgets.NumberFieldWidget;
 import com.mrbysco.structurevisualizer.screen.widgets.StructureListWidget;
 import com.mrbysco.structurevisualizer.util.StructureHelper;
-import com.mrbysco.structurevisualizer.util.TemplateHelper;
+import com.mrbysco.structurevisualizer.util.StructureRenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -74,7 +74,7 @@ public class TemplateSelectionScreen extends Screen {
 		super(new TranslationTextComponent("structurevisualizer.screen.selection.title"));
 		this.structures = Collections.unmodifiableList(StructureHelper.getStructures());
 		this.unsortedStructures = Collections.unmodifiableList(this.structures);
-		this.placementSettings = TemplateHelper.PLACEMENT_SETTINGS.copy();
+		this.placementSettings = RenderHandler.placementSettings.copy();
 	}
 
 	@Override
@@ -104,6 +104,8 @@ public class TemplateSelectionScreen extends Screen {
 			RenderHandler.cachedTemplateName = "";
 			RenderHandler.cachedTemplate = null;
 			RenderHandler.templateWorld = null;
+			RenderHandler.placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS.copy();
+			RenderHandler.position = BlockPos.ZERO;
 			minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.unload"), Util.NIL_UUID);
 		}));
 		y -= 18 + PADDING;
@@ -116,12 +118,16 @@ public class TemplateSelectionScreen extends Screen {
 					RenderHandler.cachedTemplateName = selectedTemplate.toLowerCase(Locale.ROOT);
 					RenderHandler.cachedTemplate = template;
 					RenderHandler.renderBuffer = null;
+					RenderHandler.placementSettings = placementSettings;
 					BlockPos pos = BlockPos.ZERO.offset(xPosField.getDouble() - (template.size.getX() / 2), yPosField.getDouble(), zPosField.getDouble() - (template.size.getZ() / 2));
-					TemplateHelper.initializeTemplateWorld(template, minecraft.level, pos, pos, placementSettings, 2);
+					StructureRenderHelper.initializeTemplateWorld(template, minecraft.level, pos, pos, placementSettings, 2);
+					RenderHandler.position = pos;
 					minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.load", selectedTemplate).withStyle(TextFormatting.YELLOW), Util.NIL_UUID);
 				} else {
 					RenderHandler.templateWorld = null;
 					RenderHandler.renderBuffer = null;
+					RenderHandler.position = BlockPos.ZERO;
+					RenderHandler.placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS.copy();
 					minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.load.fail", selectedTemplate).withStyle(TextFormatting.RED), Util.NIL_UUID);
 				}
 			}

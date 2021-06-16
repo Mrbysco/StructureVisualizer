@@ -25,12 +25,12 @@ import net.minecraft.world.gen.feature.template.Template;
 import java.util.Iterator;
 import java.util.List;
 
-public class TemplateHelper {
+public class StructureRenderHelper {
 	public static final PlacementSettings PLACEMENT_SETTINGS = (new PlacementSettings()).setIgnoreEntities(true).addProcessor(BlockIgnoreStructureProcessor.STRUCTURE_BLOCK);
 
 	public static boolean initializeTemplateWorld(Template template, World world, BlockPos pos, BlockPos offPos, PlacementSettings placementSettings, int placeFlag) {
+		RenderHandler.templateWorld = null;
 		if (template.palettes.isEmpty()) {
-			RenderHandler.templateWorld = null;
 			return false;
 		} else {
 			FakeWorld templateWorld = new FakeWorld(world);
@@ -141,7 +141,6 @@ public class TemplateHelper {
 				RenderHandler.renderBuffer = null;
 				return true;
 			} else {
-				RenderHandler.templateWorld = null;
 				RenderHandler.renderBuffer = null;
 				return false;
 			}
