@@ -1,0 +1,25 @@
+{
+  "_comment": "Keybinds",
+  "category.structurevisualizer.main": "Structure Visualizer",
+  "key.structurevisualizer.open": "Open Structure Menu",
+  "key.structurevisualizer.render": "Toggle Render",
+
+  "_comment": "Screen",
+  "structurevisualizer.screen.selection.title": "Structure Selection",
+  "structurevisualizer.screen.selection.load": "Load",
+  "structurevisualizer.screen.selection.unload": "Unload",
+  "structurevisualizer.screen.search": "Search",
+  "structurevisualizer.screen.position": "Position",
+  "structurevisualizer.screen.x": "X",
+  "structurevisualizer.screen.y": "Y",
+  "structurevisualizer.screen.z": "Z",
+  "structurevisualizer.screen.search.a_to_z": "A-Z",
+  "structurevisualizer.screen.search.z_to_a": "Z-A",
+
+  "_comment": "Text",
+  "structurevisualizer.render.fail": "Failed to render, Structure isn't loaded",
+  "structurevisualizer.load": "Loaded template: %s",
+  "structurevisualizer.load.fail": "Failed to load structure: %s",
+  "structurevisualizer.list": "Structure list:",
+  "structurevisualizer.unload": "Unloaded Structure"
+}
