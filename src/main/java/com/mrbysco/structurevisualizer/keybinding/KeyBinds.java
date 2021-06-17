@@ -71,7 +71,7 @@ public class KeyBinds {
 		ClientRegistry.registerKeyBinding(KEY_TOGGLE);
 		ClientRegistry.registerKeyBinding(KEY_RENDER);
 		ClientRegistry.registerKeyBinding(KEY_X_DOWN);
-		ClientRegistry.registerKeyBinding(KEY_Y_UP);
+		ClientRegistry.registerKeyBinding(KEY_X_UP);
 		ClientRegistry.registerKeyBinding(KEY_Y_DOWN);
 		ClientRegistry.registerKeyBinding(KEY_Y_UP);
 		ClientRegistry.registerKeyBinding(KEY_Z_DOWN);
