@@ -10,4 +10,4 @@ A mod allowing you to view local structures in-game fully client-side.
   - [![License](https://img.shields.io/badge/License-MIT-red.svg?style=flat)](http://opensource.org/licenses/MIT)
 
 ## Downloads ##
-Downloads aren't available yet
+Downloads will be available on [curseforge](https://www.curseforge.com/minecraft/mc-mods/structure-visualizer)
