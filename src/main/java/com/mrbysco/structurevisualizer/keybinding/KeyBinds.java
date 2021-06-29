@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.gen.feature.template.Template;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -66,6 +67,16 @@ public class KeyBinds {
 			Type.KEYSYM,
 			GLFW.GLFW_KEY_KP_6,
 			"category." + StructureVisualizer.MOD_ID + ".main");
+	public static KeyBinding KEY_LAYER_DOWN = new KeyBinding(
+			"key." + StructureVisualizer.MOD_ID + ".layer_down",
+			Type.KEYSYM,
+			GLFW.GLFW_KEY_KP_SUBTRACT,
+			"category." + StructureVisualizer.MOD_ID + ".main");
+	public static KeyBinding KEY_LAYER_UP = new KeyBinding(
+			"key." + StructureVisualizer.MOD_ID + ".layer_up",
+			Type.KEYSYM,
+			GLFW.GLFW_KEY_KP_ADD,
+			"category." + StructureVisualizer.MOD_ID + ".main");
 
 	public static void registerKeybinds(final FMLClientSetupEvent event) {
 		ClientRegistry.registerKeyBinding(KEY_TOGGLE);
@@ -77,6 +88,8 @@ public class KeyBinds {
 		ClientRegistry.registerKeyBinding(KEY_Z_DOWN);
 		ClientRegistry.registerKeyBinding(KEY_Z_UP);
 		ClientRegistry.registerKeyBinding(KEY_COORDINATE);
+		ClientRegistry.registerKeyBinding(KEY_LAYER_DOWN);
+		ClientRegistry.registerKeyBinding(KEY_LAYER_UP);
 	}
 
 	@SubscribeEvent
@@ -92,6 +105,9 @@ public class KeyBinds {
 
 		if (KEY_COORDINATE.consumeClick()) {
 			BlockPos pos = RenderHandler.position;
+			Template template = RenderHandler.cachedTemplate;
+			pos = pos.offset((template.size.getX() / 2), 0, (template.size.getZ() / 2));
+
 			minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.coordinates",
 					new StringTextComponent(String.valueOf(pos.getX())).withStyle(TextFormatting.RED),
 					new StringTextComponent(String.valueOf(pos.getY())).withStyle(TextFormatting.GREEN),
@@ -119,6 +135,45 @@ public class KeyBinds {
 			} else {
 				RenderHandler.renderStructure = !RenderHandler.renderStructure;
 			}
+		}
+
+		if (KEY_LAYER_DOWN.consumeClick()) {
+			layerDown(minecraft);
+		}
+		if (KEY_LAYER_UP.consumeClick()) {
+			layerUp(minecraft);
+		}
+	}
+
+	public void layerDown(Minecraft minecraft) {
+		if(RenderHandler.cachedTemplate != null) {
+			RenderHandler.renderBuffer = null;
+			RenderHandler.templateWorld = null;
+			int downLayer = RenderHandler.layer - 1;
+			if(downLayer == 0) {
+				RenderHandler.layer = RenderHandler.templateHeight;
+			} else {
+				RenderHandler.layer = downLayer;
+			}
+			minecraft.player.displayClientMessage(new TranslationTextComponent("structurevisualizer.layer", RenderHandler.layer, RenderHandler.templateHeight).withStyle(TextFormatting.YELLOW), true);
+
+			StructureRenderHelper.initializeTemplateWorld(RenderHandler.cachedTemplate, minecraft.level, RenderHandler.position, RenderHandler.position, RenderHandler.placementSettings, 2);
+		}
+	}
+
+	public void layerUp(Minecraft minecraft) {
+		if(RenderHandler.cachedTemplate != null) {
+			RenderHandler.renderBuffer = null;
+			RenderHandler.templateWorld = null;
+			int upLayer = RenderHandler.layer + 1;
+			if(upLayer > RenderHandler.templateHeight) {
+				RenderHandler.layer = 1;
+			} else {
+				RenderHandler.layer = upLayer;
+			}
+			minecraft.player.displayClientMessage(new TranslationTextComponent("structurevisualizer.layer", RenderHandler.layer, RenderHandler.templateHeight).withStyle(TextFormatting.YELLOW), true);
+
+			StructureRenderHelper.initializeTemplateWorld(RenderHandler.cachedTemplate, minecraft.level, RenderHandler.position, RenderHandler.position, RenderHandler.placementSettings, 2);
 		}
 	}
 

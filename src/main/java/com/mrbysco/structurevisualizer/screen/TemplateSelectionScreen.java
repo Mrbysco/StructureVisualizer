@@ -101,11 +101,12 @@ public class TemplateSelectionScreen extends Screen {
 		y -= 18 + PADDING;
 		this.addButton(this.unloadButton = new Button(centerWidth - (doneButtonWidth / 2) + PADDING, y, doneButtonWidth, 20,
 				new TranslationTextComponent("structurevisualizer.screen.selection.unload"), b -> {
-			RenderHandler.cachedTemplateName = "";
-			RenderHandler.cachedTemplate = null;
 			RenderHandler.templateWorld = null;
-			RenderHandler.placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS.copy();
+			RenderHandler.renderBuffer = null;
 			RenderHandler.position = BlockPos.ZERO;
+			RenderHandler.placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS.copy();
+			RenderHandler.templateHeight = 0;
+			RenderHandler.layer = 0;
 			minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.unload"), Util.NIL_UUID);
 		}));
 		y -= 18 + PADDING;
@@ -117,6 +118,8 @@ public class TemplateSelectionScreen extends Screen {
 				if(template != null) {
 					RenderHandler.cachedTemplateName = selectedTemplate.toLowerCase(Locale.ROOT);
 					RenderHandler.cachedTemplate = template;
+					RenderHandler.templateHeight = template.size.getY();
+					RenderHandler.layer = RenderHandler.templateHeight;
 					RenderHandler.renderBuffer = null;
 					RenderHandler.placementSettings = placementSettings;
 					BlockPos pos = BlockPos.ZERO.offset(xPosField.getDouble() - (template.size.getX() / 2), yPosField.getDouble(), zPosField.getDouble() - (template.size.getZ() / 2));
@@ -128,6 +131,8 @@ public class TemplateSelectionScreen extends Screen {
 					RenderHandler.renderBuffer = null;
 					RenderHandler.position = BlockPos.ZERO;
 					RenderHandler.placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS.copy();
+					RenderHandler.templateHeight = 0;
+					RenderHandler.layer = 0;
 					minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.load.fail", selectedTemplate).withStyle(TextFormatting.RED), Util.NIL_UUID);
 				}
 			}

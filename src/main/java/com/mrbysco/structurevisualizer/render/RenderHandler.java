@@ -40,6 +40,8 @@ public class RenderHandler {
 	public static FakeWorld templateWorld = null;
 	public static BlockPos position = BlockPos.ZERO;
 	public static PlacementSettings placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS;
+	public static int templateHeight = 0;
+	public static int layer = 0;
 
 	@SubscribeEvent
 	public void onRenderWorldLastEvent(RenderWorldLastEvent event) {

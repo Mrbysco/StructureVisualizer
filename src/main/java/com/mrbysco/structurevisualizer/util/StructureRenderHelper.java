@@ -48,28 +48,30 @@ public class StructureRenderHelper {
 
 				for(Template.BlockInfo template$blockinfo : Template.processBlockInfos(templateWorld, pos, offPos, placementSettings, list, template)) {
 					BlockPos blockpos = template$blockinfo.pos;
-					if (mutableboundingbox == null || mutableboundingbox.isInside(blockpos)) {
-						FluidState fluidstate = placementSettings.shouldKeepLiquids() ? templateWorld.getFluidState(blockpos) : null;
-						BlockState blockstate = template$blockinfo.state.mirror(placementSettings.getMirror()).rotate(placementSettings.getRotation());
-						if (template$blockinfo.nbt != null) {
-							TileEntity tileentity = templateWorld.getBlockEntity(blockpos);
-							IClearable.tryClear(tileentity);
-							templateWorld.setBlock(blockpos, Blocks.BARRIER.defaultBlockState(), 20);
-						}
+					if((blockpos.getY() - pos.getY()) < RenderHandler.layer) {
+						if (mutableboundingbox == null || mutableboundingbox.isInside(blockpos)) {
+							FluidState fluidstate = placementSettings.shouldKeepLiquids() ? templateWorld.getFluidState(blockpos) : null;
+							BlockState blockstate = template$blockinfo.state.mirror(placementSettings.getMirror()).rotate(placementSettings.getRotation());
+							if (template$blockinfo.nbt != null) {
+								TileEntity tileentity = templateWorld.getBlockEntity(blockpos);
+								IClearable.tryClear(tileentity);
+								templateWorld.setBlock(blockpos, Blocks.BARRIER.defaultBlockState(), 20);
+							}
 
-						if (templateWorld.setBlock(blockpos, blockstate, placeFlag)) {
-							i = Math.min(i, blockpos.getX());
-							j = Math.min(j, blockpos.getY());
-							k = Math.min(k, blockpos.getZ());
-							l = Math.max(l, blockpos.getX());
-							i1 = Math.max(i1, blockpos.getY());
-							j1 = Math.max(j1, blockpos.getZ());
-							list2.add(Pair.of(blockpos, template$blockinfo.nbt));
+							if (templateWorld.setBlock(blockpos, blockstate, placeFlag)) {
+								i = Math.min(i, blockpos.getX());
+								j = Math.min(j, blockpos.getY());
+								k = Math.min(k, blockpos.getZ());
+								l = Math.max(l, blockpos.getX());
+								i1 = Math.max(i1, blockpos.getY());
+								j1 = Math.max(j1, blockpos.getZ());
+								list2.add(Pair.of(blockpos, template$blockinfo.nbt));
 
-							if (fluidstate != null && blockstate.getBlock() instanceof ILiquidContainer) {
-								((ILiquidContainer)blockstate.getBlock()).placeLiquid(templateWorld, blockpos, blockstate, fluidstate);
-								if (!fluidstate.isSource()) {
-									list1.add(blockpos);
+								if (fluidstate != null && blockstate.getBlock() instanceof ILiquidContainer) {
+									((ILiquidContainer)blockstate.getBlock()).placeLiquid(templateWorld, blockpos, blockstate, fluidstate);
+									if (!fluidstate.isSource()) {
+										list1.add(blockpos);
+									}
 								}
 							}
 						}

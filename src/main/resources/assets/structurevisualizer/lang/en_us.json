@@ -10,6 +10,8 @@
   "key.structurevisualizer.z_down": "Move Z Down",
   "key.structurevisualizer.z_up": "Move Z Up",
   "key.structurevisualizer.coordinate": "Structure Coordinates",
+  "key.structurevisualizer.layer_down": "Layer Down",
+  "key.structurevisualizer.layer_up": "Layer Up",
 
   "_comment": "Screen",
   "structurevisualizer.screen.selection.title": "Structure Selection",
@@ -31,5 +33,6 @@
   "structurevisualizer.load.fail": "Failed to load structure: %s",
   "structurevisualizer.list": "Structure list:",
   "structurevisualizer.unload": "Unloaded Structure",
-  "structurevisualizer.coordinates": "Structure is located at: X: %s, Y: %s, Z: %s"
+  "structurevisualizer.coordinates": "Structure is located at: X: %s, Y: %s, Z: %s",
+  "structurevisualizer.layer": "Rendering %s out of %s layers"
 }
