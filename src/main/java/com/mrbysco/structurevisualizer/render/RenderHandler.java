@@ -93,10 +93,10 @@ public class RenderHandler {
 			renderBuffer.close();
 
 		Minecraft minecraft = Minecraft.getInstance();
-		renderBuffer = MultiVBORenderer.of((buffer) -> {
+		renderBuffer = MultiVBORenderer.of((renderTypeBuffer) -> {
 			World level = player.level;
-			IVertexBuilder builder = buffer.getBuffer(CustomRenderType.VISUAL_BLOCK);
-			IVertexBuilder noDepthbuilder = buffer.getBuffer(CustomRenderType.VISUAL_BLOCK_NO_DEPTH);
+			IVertexBuilder builder = renderTypeBuffer.getBuffer(CustomRenderType.VISUAL_BLOCK);
+			IVertexBuilder noDepthbuilder = renderTypeBuffer.getBuffer(CustomRenderType.VISUAL_BLOCK_NO_DEPTH);
 
 			BlockRendererDispatcher dispatcher = minecraft.getBlockRenderer();
 
@@ -134,6 +134,43 @@ public class RenderHandler {
 								renderModelBrightnessColorQuads(stack.last(), builder, f, f1, f2, 0.8F, ibakedmodel.getQuads(state, null, new Random(MathHelper.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
 							else
 								renderModelBrightnessColorQuads(stack.last(), noDepthbuilder, f, f1, f2, 0.8F, ibakedmodel.getQuads(state, null, new Random(MathHelper.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
+						} else {
+//							if(state.hasTileEntity()) { TODO: WIP, DO NOT UNCOMMENT!
+//								if(state.getValues().containsKey(BedBlock.PART) && state.getValue(BedBlock.PART) != BedPart.HEAD) {
+//
+//								} else {
+//									if(state.getValues().containsKey(BedBlock.PART) && state.getValue(BedBlock.PART) == BedPart.HEAD &&
+//											state.getValues().containsKey(BlockStateProperties.HORIZONTAL_FACING)) {
+//										Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+//
+//										if(facing == Direction.NORTH) {
+//											stack.mulPose(Vector3f.YP.rotationDegrees(180F));
+//											stack.translate(-1, 0, -1);
+//										} else if(facing == Direction.EAST) {
+//											stack.mulPose(Vector3f.YP.rotationDegrees(90F));
+//											stack.translate(-1, 0, 0);
+//										} else if(facing == Direction.WEST) {
+//											stack.mulPose(Vector3f.YN.rotationDegrees(90F));
+//											stack.translate(0, 0, -1);
+//										}
+//									}
+//
+//									RenderSystem.pushMatrix();
+//
+//									RenderSystem.enableBlend();
+//									RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+//									RenderSystem.color4f(1f, 1f, 1f, 0.0F);
+//
+//									final ItemStack tileStack = new ItemStack(state.getBlock());
+//									tileStack.getItem().getItemStackTileEntityRenderer().renderByItem(tileStack, ItemCameraTransforms.TransformType.NONE, stack, renderTypeBuffer, 15728640, 655360);
+//									RenderSystem.color4f(1f, 1f, 1f, 0.0F);
+//
+//									RenderSystem.disableBlend();
+//									RenderSystem.defaultBlendFunc();
+//
+//									RenderSystem.popMatrix();
+//								}
+//							}
 						}
 					} catch (Exception e) {
 						StructureVisualizer.LOGGER.trace("Caught exception whilst rendering {}.", state, e);

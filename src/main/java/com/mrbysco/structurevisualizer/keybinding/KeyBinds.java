@@ -106,12 +106,14 @@ public class KeyBinds {
 		if (KEY_COORDINATE.consumeClick()) {
 			BlockPos pos = RenderHandler.position;
 			Template template = RenderHandler.cachedTemplate;
-			pos = pos.offset((template.size.getX() / 2), 0, (template.size.getZ() / 2));
+			if(pos != null && template != null) {
+				pos = pos.offset((template.size.getX() / 2), 0, (template.size.getZ() / 2));
 
-			minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.coordinates",
-					new StringTextComponent(String.valueOf(pos.getX())).withStyle(TextFormatting.RED),
-					new StringTextComponent(String.valueOf(pos.getY())).withStyle(TextFormatting.GREEN),
-					new StringTextComponent(String.valueOf(pos.getZ())).withStyle(TextFormatting.BLUE)), Util.NIL_UUID);
+				minecraft.player.sendMessage(new TranslationTextComponent("structurevisualizer.coordinates",
+						new StringTextComponent(String.valueOf(pos.getX())).withStyle(TextFormatting.RED),
+						new StringTextComponent(String.valueOf(pos.getY())).withStyle(TextFormatting.GREEN),
+						new StringTextComponent(String.valueOf(pos.getZ())).withStyle(TextFormatting.BLUE)), Util.NIL_UUID);
+			}
 		}
 
 		if (KEY_X_DOWN.consumeClick()){
