@@ -2,10 +2,11 @@ package com.mrbysco.structurevisualizer.render.vbo;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
+import com.mrbysco.structurevisualizer.render.vbo.CustomBufferBuilder.SortState;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.math.vector.Matrix4f;
 
 import java.io.Closeable;
 import java.util.Map;
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
 public class MultiVBORenderer implements Closeable {
 	private static final int BUFFER_SIZE = 2 * 1024 * 1024 * 3;
 
-	public static MultiVBORenderer of(Consumer<IRenderTypeBuffer> vertexProducer) {
+	public static MultiVBORenderer of(Consumer<MultiBufferSource> vertexProducer) {
 		final Map<RenderType, CustomBufferBuilder> builders = Maps.newHashMap();
 
 		vertexProducer.accept(rt -> builders.computeIfAbsent(rt, (_rt) -> {
@@ -30,13 +31,13 @@ public class MultiVBORenderer implements Closeable {
 			return builder;
 		}));
 
-		Map<RenderType, CustomBufferBuilder.State> sortCaches = Maps.newHashMap();
+		Map<RenderType, CustomBufferBuilder.SortState> sortCaches = Maps.newHashMap();
 		Map<RenderType, CustomVertexBuffer> buffers = Maps.transformEntries(builders, (rt, builder) -> {
 			Objects.requireNonNull(rt);
 			Objects.requireNonNull(builder);
-			sortCaches.put(rt, builder.getVertexState());
+			sortCaches.put(rt, builder.getSortState());
 
-			builder.finishDrawing();
+			builder.end();
 			VertexFormat fmt = rt.format();
 			CustomVertexBuffer vbo = new CustomVertexBuffer(fmt);
 
@@ -48,38 +49,38 @@ public class MultiVBORenderer implements Closeable {
 	}
 
 	private final ImmutableMap<RenderType, CustomVertexBuffer> buffers;
-	private final ImmutableMap<RenderType, CustomBufferBuilder.State> sortCaches;
+	private final ImmutableMap<RenderType, CustomBufferBuilder.SortState> sortCaches;
 
-	protected MultiVBORenderer(Map<RenderType, CustomVertexBuffer> buffers, Map<RenderType, CustomBufferBuilder.State> sortCaches) {
+	protected MultiVBORenderer(Map<RenderType, CustomVertexBuffer> buffers, Map<RenderType, CustomBufferBuilder.SortState> sortCaches) {
 		this.buffers = ImmutableMap.copyOf(buffers);
 		this.sortCaches = ImmutableMap.copyOf(sortCaches);
 	}
 
 	public void sort(float x, float y, float z) {
-		for (Map.Entry<RenderType, CustomBufferBuilder.State> kv : sortCaches.entrySet()) {
-			RenderType rt = kv.getKey();
-			CustomBufferBuilder.State state = kv.getValue();
+		for (Map.Entry<RenderType, CustomBufferBuilder.SortState> renderTypeSortStateEntry : sortCaches.entrySet()) {
+			RenderType renderType = renderTypeSortStateEntry.getKey();
+			CustomBufferBuilder.SortState state = renderTypeSortStateEntry.getValue();
 			CustomBufferBuilder builder = new CustomBufferBuilder(BUFFER_SIZE);
-			builder.begin(rt.mode(), rt.format());
-			builder.setVertexState(state);
-			builder.sortVertexData(x, y, z);
-			builder.finishDrawing();
+			builder.begin(renderType.mode(), renderType.format());
 
-			CustomVertexBuffer vbo = buffers.get(rt);
+
+			builder.restoreSortState(new SortState(state.mode, state.vertices, state.sortingPoints, x, y, z));
+			builder.end();
+
+			CustomVertexBuffer vbo = buffers.get(renderType);
 			vbo.upload(builder);
 		}
 	}
 
 	public void render(Matrix4f matrix) {
 		buffers.forEach((rt, vbo) -> {
-			VertexFormat fmt = rt.format();
-
 			rt.setupRenderState();
-			vbo.bindBuffer();
-			fmt.setupBufferState(0L);
-			vbo.draw(matrix, rt.mode());
-			CustomVertexBuffer.unbindBuffer();
-			fmt.clearBufferState();
+			vbo.bind();
+			vbo.drawChunkLayer();
+
+			CustomVertexBuffer.unbind();
+			CustomVertexBuffer.unbindVertexArray();
+
 			rt.clearRenderState();
 		});
 	}

@@ -1,19 +1,19 @@
 package com.mrbysco.structurevisualizer.screen.widgets;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrbysco.structurevisualizer.screen.TemplateSelectionScreen;
 import com.mrbysco.structurevisualizer.screen.widgets.StructureListWidget.ListEntry;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.widget.list.ExtendedList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.LanguageMap;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.TextComponent;
 
-public class StructureListWidget extends ExtendedList<ListEntry> {
+public class StructureListWidget extends ObjectSelectionList<ListEntry> {
 	private final int listWidth;
 
-	private TemplateSelectionScreen parent;
+	private final TemplateSelectionScreen parent;
 
 	public StructureListWidget(TemplateSelectionScreen parent, int listWidth, int top, int bottom) {
 		super(parent.getMinecraft(), listWidth, parent.height, top, bottom, parent.getFontRenderer().lineHeight * 2 + 8);
@@ -40,11 +40,11 @@ public class StructureListWidget extends ExtendedList<ListEntry> {
 	}
 
 	@Override
-	protected void renderBackground(MatrixStack mStack) {
+	protected void renderBackground(PoseStack mStack) {
 		this.parent.renderBackground(mStack);
 	}
 
-	public class ListEntry extends ExtendedList.AbstractListEntry<ListEntry> {
+	public class ListEntry extends ObjectSelectionList.Entry<ListEntry> {
 		private final String structureName;
 		private final TemplateSelectionScreen parent;
 
@@ -54,10 +54,10 @@ public class StructureListWidget extends ExtendedList<ListEntry> {
 		}
 
 		@Override
-		public void render(MatrixStack mStack, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean p_194999_5_, float partialTicks) {
-			ITextComponent name = new StringTextComponent(structureName);
-			FontRenderer font = this.parent.getFontRenderer();
-			font.draw(mStack, LanguageMap.getInstance().getVisualOrder(ITextProperties.composite(font.substrByWidth(name, listWidth)))
+		public void render(PoseStack mStack, int entryIdx, int top, int left, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean p_194999_5_, float partialTicks) {
+			Component name = new TextComponent(structureName);
+			Font font = this.parent.getFontRenderer();
+			font.draw(mStack, Language.getInstance().getVisualOrder(FormattedText.composite(font.substrByWidth(name, listWidth)))
 					, (this.parent.width / 2) - (font.width(structureName) / 2) + 3, top + 6, 0xFFFFFF);
 		}
 
@@ -71,6 +71,11 @@ public class StructureListWidget extends ExtendedList<ListEntry> {
 		public String getStructureName()
 		{
 			return structureName;
+		}
+
+		@Override
+		public Component getNarration() {
+			return new TextComponent(structureName);
 		}
 	}
 }

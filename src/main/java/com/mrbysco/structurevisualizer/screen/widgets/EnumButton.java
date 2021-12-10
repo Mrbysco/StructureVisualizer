@@ -1,13 +1,15 @@
 package com.mrbysco.structurevisualizer.screen.widgets;
 
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.TextComponent;
+
+import net.minecraft.client.gui.components.Button.OnPress;
 
 public class EnumButton extends Button {
 	private Enum value;
 
-	public EnumButton(int x, int y, int width, int height, Enum defaultValue, IPressable pressedAction) {
-		super(x, y, width, height, new StringTextComponent(defaultValue.toString()), pressedAction);
+	public EnumButton(int x, int y, int width, int height, Enum defaultValue, OnPress pressedAction) {
+		super(x, y, width, height, new TextComponent(defaultValue.toString()), pressedAction);
 		this.value = defaultValue;
 	}
 
@@ -17,6 +19,6 @@ public class EnumButton extends Button {
 
 	public void setValue(Enum value) {
 		this.value = value;
-		this.setMessage(new StringTextComponent(value.toString()));
+		this.setMessage(new TextComponent(value.toString()));
 	}
 }

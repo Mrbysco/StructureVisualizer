@@ -1,26 +1,26 @@
 package com.mrbysco.structurevisualizer.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mrbysco.structurevisualizer.StructureVisualizer;
 import com.mrbysco.structurevisualizer.render.vbo.MultiVBORenderer;
 import com.mrbysco.structurevisualizer.util.StructureRenderHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.template.PlacementSettings;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -35,17 +35,17 @@ public class RenderHandler {
 	private int tickTrack = 0;
 
 	public static String cachedTemplateName = "";
-	public static Template cachedTemplate = null;
+	public static StructureTemplate cachedTemplate = null;
 	public static boolean renderStructure = false;
 	public static FakeWorld templateWorld = null;
 	public static BlockPos position = BlockPos.ZERO;
-	public static PlacementSettings placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS;
+	public static StructurePlaceSettings placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS;
 	public static int templateHeight = 0;
 	public static int layer = 0;
 
 	@SubscribeEvent
 	public void onRenderWorldLastEvent(RenderWorldLastEvent event) {
-		PlayerEntity player = Minecraft.getInstance().player;
+		Player player = Minecraft.getInstance().player;
 		if( player == null )
 			return;
 
@@ -57,8 +57,8 @@ public class RenderHandler {
 			} else {
 				final Minecraft minecraft = Minecraft.getInstance();
 
-				final Vector3d cameraView = minecraft.gameRenderer.getMainCamera().getPosition();
-				MatrixStack poseStack = event.getMatrixStack(); //Get current matrix position from the evt call
+				final Vec3 cameraView = minecraft.gameRenderer.getMainCamera().getPosition();
+				PoseStack poseStack = event.getMatrixStack(); //Get current matrix position from the evt call
 				poseStack.pushPose();
 				poseStack.translate(-cameraView.x, -cameraView.y, -cameraView.z);
 
@@ -69,14 +69,14 @@ public class RenderHandler {
 		}
 	}
 
-	public void renderTemplate(MatrixStack poseStack, Vector3d cameraView, PlayerEntity player) {
+	public void renderTemplate(PoseStack poseStack, Vec3 cameraView, Player player) {
 		tickTrack++;
 		BlockPos startPos = BlockPos.ZERO;
 		if (renderBuffer != null && tickTrack < 300) {
 			if (tickTrack % 30 == 0) {
 				try {
-					Vector3d projectedView2 = cameraView;
-					Vector3d startPosView = new Vector3d(startPos.getX(), startPos.getY(), startPos.getZ());
+					Vec3 projectedView2 = cameraView;
+					Vec3 startPosView = new Vec3(startPos.getX(), startPos.getY(), startPos.getZ());
 					projectedView2 = projectedView2.subtract(startPosView);
 					renderBuffer.sort((float) projectedView2.x(), (float) projectedView2.y(), (float) projectedView2.z());
 				} catch (Exception ignored) {
@@ -94,24 +94,25 @@ public class RenderHandler {
 
 		Minecraft minecraft = Minecraft.getInstance();
 		renderBuffer = MultiVBORenderer.of((renderTypeBuffer) -> {
-			World level = player.level;
-			IVertexBuilder builder = renderTypeBuffer.getBuffer(CustomRenderType.VISUAL_BLOCK);
-			IVertexBuilder noDepthbuilder = renderTypeBuffer.getBuffer(CustomRenderType.VISUAL_BLOCK_NO_DEPTH);
+			Level level = player.level;
+			VertexConsumer builder = renderTypeBuffer.getBuffer(CustomRenderType.VISUAL_BLOCK);
+			VertexConsumer noDepthbuilder = renderTypeBuffer.getBuffer(CustomRenderType.VISUAL_BLOCK_NO_DEPTH);
 
-			BlockRendererDispatcher dispatcher = minecraft.getBlockRenderer();
+			BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
 
-			MatrixStack stack = new MatrixStack(); //Create a new matrix stack for use in the buffer building process
+			PoseStack stack = new PoseStack(); //Create a new matrix stack for use in the buffer building process
 			stack.pushPose(); //Save position
 
 			for (Map.Entry<BlockPos, BlockState> entry : templateWorld.entrySet()) {
 				BlockPos targetPos = entry.getKey();
 				BlockState state = entry.getValue();
+				BlockPos.MutableBlockPos mutablePos = targetPos.mutable();
 
 				stack.pushPose(); //Save position again
 				//matrix.translate(-startPos.getX(), -startPos.getY(), -startPos.getZ());
 				stack.translate(targetPos.getX(), targetPos.getY(), targetPos.getZ());
 
-				IBakedModel ibakedmodel = dispatcher.getBlockModel(state);
+				BakedModel blockModel = dispatcher.getBlockModel(state);
 				BlockColors blockColors = minecraft.getBlockColors();
 				int color = blockColors.getColor(state, templateWorld, targetPos, 0);
 
@@ -120,20 +121,22 @@ public class RenderHandler {
 				float f2 = (float) (color & 255) / 255.0F;
 				if(level.isEmptyBlock(targetPos)) {
 					try {
-						if (state.getRenderShape() == BlockRenderType.MODEL) {
+						if (state.getRenderShape() == RenderShape.MODEL) {
 							for (Direction direction : Direction.values()) {
-								if (Block.shouldRenderFace(state, templateWorld, targetPos, direction) && !(templateWorld.getBlockState(targetPos.relative(direction)).getBlock().equals(state.getBlock()))) {
+								mutablePos.setWithOffset(targetPos, direction);
+								if (Block.shouldRenderFace(state, templateWorld, targetPos, direction, mutablePos) && !(templateWorld.getBlockState(targetPos.relative(direction)).getBlock().equals(state.getBlock()))) {
 									if (state.getMaterial().isSolidBlocking()) {
-										renderModelBrightnessColorQuads(stack.last(), builder, f, f1, f2, 0.8F, ibakedmodel.getQuads(state, direction, new Random(MathHelper.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
+										renderModelBrightnessColorQuads(stack.last(), builder, f, f1, f2, 0.8F, blockModel.getQuads(state, direction, new Random(Mth.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
 									} else {
-										renderModelBrightnessColorQuads(stack.last(), noDepthbuilder, f, f1, f2, 0.8F, ibakedmodel.getQuads(state, direction, new Random(MathHelper.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
+										renderModelBrightnessColorQuads(stack.last(), noDepthbuilder, f, f1, f2, 0.8F, blockModel.getQuads(state, direction, new Random(Mth.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
 									}
 								}
 							}
-							if (state.getMaterial().isSolidBlocking())
-								renderModelBrightnessColorQuads(stack.last(), builder, f, f1, f2, 0.8F, ibakedmodel.getQuads(state, null, new Random(MathHelper.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
-							else
-								renderModelBrightnessColorQuads(stack.last(), noDepthbuilder, f, f1, f2, 0.8F, ibakedmodel.getQuads(state, null, new Random(MathHelper.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
+							if (state.getMaterial().isSolidBlocking()) {
+								renderModelBrightnessColorQuads(stack.last(), builder, f, f1, f2, 0.8F, blockModel.getQuads(state, null, new Random(Mth.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
+							} else {
+								renderModelBrightnessColorQuads(stack.last(), noDepthbuilder, f, f1, f2, 0.8F, blockModel.getQuads(state, null, new Random(Mth.getSeed(targetPos)), EmptyModelData.INSTANCE), 15728640, 655360);
+							}
 						}
 					} catch (Exception e) {
 						StructureVisualizer.LOGGER.trace("Caught exception whilst rendering {}.", state, e);
@@ -143,18 +146,16 @@ public class RenderHandler {
 			}
 			stack.popPose(); //Load after loop
 		});
-//        try {
-		Vector3d projectedView2 = minecraft.gameRenderer.getMainCamera().getPosition();
-		Vector3d startPosView = new Vector3d(startPos.getX(), startPos.getY(), startPos.getZ());
+
+		Vec3 projectedView2 = minecraft.gameRenderer.getMainCamera().getPosition();
+		Vec3 startPosView = new Vec3(startPos.getX(), startPos.getY(), startPos.getZ());
 		projectedView2 = projectedView2.subtract(startPosView);
 		renderBuffer.sort((float) projectedView2.x(), (float) projectedView2.y(), (float) projectedView2.z());
-//        } catch (Exception ignored) {
-//        }
 		poseStack.translate(startPos.getX(), startPos.getY(), startPos.getZ());
 		renderBuffer.render(poseStack.last().pose()); //Actually draw whats in the buffer
 	}
 
-	public static void renderModelBrightnessColorQuads(MatrixStack.Entry matrixEntry, IVertexBuilder builder, float red, float green, float blue, float alpha, List<BakedQuad> listQuads, int combinedLightsIn, int combinedOverlayIn) {
+	public static void renderModelBrightnessColorQuads(PoseStack.Pose matrixEntry, VertexConsumer builder, float red, float green, float blue, float alpha, List<BakedQuad> listQuads, int combinedLightsIn, int combinedOverlayIn) {
 		for(BakedQuad bakedquad : listQuads) {
 			float f;
 			float f1;
@@ -170,7 +171,7 @@ public class RenderHandler {
 				f2 = 1f;
 			}
 
-			builder.addVertexData(matrixEntry, bakedquad, f, f1, f2, alpha, combinedLightsIn, combinedOverlayIn);
+			builder.putBulkData(matrixEntry, bakedquad, f, f1, f2, alpha, combinedLightsIn, combinedOverlayIn);
 		}
 	}
 }

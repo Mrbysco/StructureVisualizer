@@ -1,12 +1,12 @@
 package com.mrbysco.structurevisualizer.screen.widgets;
 
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.math.NumberUtils;
 
-public class NumberFieldWidget extends TextFieldWidget {
-	public NumberFieldWidget(FontRenderer font, int x, int y, int width, int height, ITextComponent defaultValue) {
+public class NumberFieldWidget extends EditBox {
+	public NumberFieldWidget(Font font, int x, int y, int width, int height, Component defaultValue) {
 		super(font, x, y, width, height, defaultValue);
 	}
 

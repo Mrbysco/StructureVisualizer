@@ -1,37 +1,39 @@
 package com.mrbysco.structurevisualizer.render;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.ITickList;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeManager;
-import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.gen.Heightmap.Type;
-import net.minecraft.world.lighting.WorldLightManager;
-import net.minecraft.world.storage.IWorldInfo;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.TickList;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.Heightmap.Types;
+import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -47,11 +49,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class FakeWorld implements IWorld {
-	private final IWorld delegate;
-	private Map<BlockPos, BlockState> posToBlock;
+public class FakeWorld implements LevelAccessor {
+	private final LevelAccessor delegate;
+	private final Map<BlockPos, BlockState> posToBlock;
 
-	public FakeWorld(IWorld delegate) {
+	public FakeWorld(LevelAccessor delegate) {
 		this.delegate = Objects.requireNonNull(delegate);
 		posToBlock = new HashMap<>();
 	}
@@ -60,53 +62,63 @@ public class FakeWorld implements IWorld {
 		return Collections.unmodifiableSet(posToBlock.entrySet());
 	}
 
-	public IWorld getDelegate() {
+	public LevelAccessor getDelegate() {
 		return delegate;
 	}
 
 	@Override
-	public void playSound(@Nullable PlayerEntity player, BlockPos pos, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
+	public void playSound(@Nullable Player player, BlockPos pos, SoundEvent soundIn, SoundSource category, float volume, float pitch) {
 
 	}
 
 	@Override
-	public void addParticle(IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+	public void addParticle(ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
 
 	}
 
 	@Override
-	public void levelEvent(@Nullable PlayerEntity p_217378_1_, int p_217378_2_, BlockPos p_217378_3_, int p_217378_4_) {
+	public void levelEvent(@Nullable Player p_217378_1_, int p_217378_2_, BlockPos p_217378_3_, int p_217378_4_) {
 
 	}
 
 	@Override
-	public List<Entity> getEntities(@Nullable Entity entity, AxisAlignedBB axisAlignedBB, @Nullable Predicate<? super Entity> predicate) {
+	public void gameEvent(@Nullable Entity p_151549_, GameEvent p_151550_, BlockPos p_151551_) {
+
+	}
+
+	@Override
+	public List<Entity> getEntities(@Nullable Entity entity, AABB axisAlignedBB, @Nullable Predicate<? super Entity> predicate) {
 		return new ArrayList<>();
 	}
 
 	@Override
-	public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> aClass, AxisAlignedBB axisAlignedBB, @Nullable Predicate<? super T> predicate) {
+	public <T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> p_151464_, AABB p_151465_, Predicate<? super T> p_151466_) {
 		return new ArrayList<>();
 	}
 
 	@Override
-	public List<? extends PlayerEntity> players() {
+	public <T extends Entity> List<T> getEntitiesOfClass(Class<T> p_45979_, AABB p_45980_, Predicate<? super T> p_45981_) {
+		return List.of();
+	}
+
+	@Override
+	public List<? extends Player> players() {
 		return new ArrayList<>();
 	}
 
 	@Nullable
 	@Override
-	public IChunk getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus status, boolean p_217353_4_) {
+	public ChunkAccess getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus status, boolean p_217353_4_) {
 		return getChunk(p_217353_1_, p_217353_2_);
 	}
 
 	@Override
-	public BlockPos getHeightmapPos(Type heightmapType, BlockPos pos) {
+	public BlockPos getHeightmapPos(Types heightmapType, BlockPos pos) {
 		return getDelegate().getHeightmapPos(heightmapType, pos);
 	}
 
 	@Override
-	public DynamicRegistries registryAccess() {
+	public RegistryAccess registryAccess() {
 		return null;
 	}
 
@@ -121,18 +133,23 @@ public class FakeWorld implements IWorld {
 	}
 
 	@Override
+	public boolean isFluidAtPosition(BlockPos p_151584_, Predicate<FluidState> p_151585_) {
+		return false;
+	}
+
+	@Override
 	@OnlyIn(Dist.CLIENT)
 	public int getMoonPhase() {
 		return delegate.getMoonPhase();
 	}
 
 	@Override
-	public ITickList<Block> getBlockTicks() {
+	public TickList<Block> getBlockTicks() {
 		return delegate.getBlockTicks();
 	}
 
 	@Override
-	public ITickList<Fluid> getLiquidTicks() {
+	public TickList<Fluid> getLiquidTicks() {
 		return delegate.getLiquidTicks();
 	}
 
@@ -140,18 +157,24 @@ public class FakeWorld implements IWorld {
 	 * Gets the chunk at the specified location.
 	 */
 	@Override
-	public IChunk getChunk(int chunkX, int chunkZ) {
+	public ChunkAccess getChunk(int chunkX, int chunkZ) {
 		return delegate.getChunk(chunkX, chunkZ);
 	}
 
 	@Override
-	public IWorldInfo getLevelData() {
+	public LevelData getLevelData() {
 		return delegate.getLevelData();
 	}
 
 	@Override
 	public DifficultyInstance getCurrentDifficultyAt(BlockPos pos) {
 		return delegate.getCurrentDifficultyAt(pos);
+	}
+
+	@Nullable
+	@Override
+	public MinecraftServer getServer() {
+		return this.delegate.getServer();
 	}
 
 	@Override
@@ -163,7 +186,7 @@ public class FakeWorld implements IWorld {
 	 * gets the world's chunk provider
 	 */
 	@Override
-	public AbstractChunkProvider getChunkSource() {
+	public ChunkSource getChunkSource() {
 		return delegate.getChunkSource();
 	}
 
@@ -187,7 +210,7 @@ public class FakeWorld implements IWorld {
 	 */
 	@Override
 	public boolean isEmptyBlock(BlockPos pos) {
-		return getBlockState(pos).isAir(this, pos);
+		return getBlockState(pos).isAir();
 	}
 
 	@Override
@@ -201,7 +224,7 @@ public class FakeWorld implements IWorld {
 	}
 
 	@Override
-	public int getHeight(Heightmap.Type heightmapType, int x, int z) {
+	public int getHeight(Heightmap.Types heightmapType, int x, int z) {
 		return delegate.getHeight(heightmapType, x, z);
 	}
 
@@ -254,13 +277,13 @@ public class FakeWorld implements IWorld {
 
 	@Nullable
 	@Override
-	public TileEntity getBlockEntity(BlockPos p_175625_1_) {
+	public BlockEntity getBlockEntity(BlockPos p_175625_1_) {
 		return null;
 	}
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {
-		if (World.isOutsideBuildHeight(pos))
+		if (this.delegate.isOutsideBuildHeight(pos))
 			return Blocks.VOID_AIR.defaultBlockState();
 		BlockState state = getOverriddenBlockState(pos);
 		return state != null ? state : Blocks.AIR.defaultBlockState();
@@ -294,7 +317,7 @@ public class FakeWorld implements IWorld {
 	 */
 	@Override
 	public boolean setBlock(BlockPos pos, BlockState newState, int flags) {
-		if (World.isOutsideBuildHeight(pos))
+		if (this.delegate.isOutsideBuildHeight(pos))
 			return false;
 		posToBlock.put(pos, newState);
 		return true;
@@ -306,7 +329,7 @@ public class FakeWorld implements IWorld {
 	@Override
 	public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
 		// adapted from World
-		return ! this.getBlockState(pos).isAir(this, pos) && removeBlock(pos, true);
+		return ! this.getBlockState(pos).isAir() && removeBlock(pos, true);
 	}
 
 	@Override
@@ -327,10 +350,7 @@ public class FakeWorld implements IWorld {
 
 	public boolean removeOverride(BlockPos pos) {
 		BlockState state = posToBlock.remove(pos);
-		if (state != null) {
-			return true;
-		}
-		return false;
+		return state != null;
 	}
 
 	@Override
@@ -344,7 +364,7 @@ public class FakeWorld implements IWorld {
 	}
 
 	@Override
-	public WorldLightManager getLightEngine() {
+	public LevelLightEngine getLightEngine() {
 		return delegate.getLightEngine();
 	}
 }

@@ -1,13 +1,13 @@
 package com.mrbysco.structurevisualizer.util;
 
 import com.mrbysco.structurevisualizer.StructureVisualizer;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.ResourceLocationException;
-import net.minecraft.util.datafix.DataFixesManager;
-import net.minecraft.util.datafix.DefaultTypeReferences;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -25,7 +25,7 @@ import java.util.Locale;
 
 public class StructureHelper {
 
-	public static Template loadFromDirectory(String structureName) {
+	public static StructureTemplate loadFromDirectory(String structureName) {
 		String name;
 		if(structureName.endsWith(".nbt")) {
 			name = structureName;
@@ -58,18 +58,18 @@ public class StructureHelper {
 		}
 	}
 
-	private static Template readStructure(InputStream p_209205_1_) throws IOException {
-		CompoundNBT compoundnbt = CompressedStreamTools.readCompressed(p_209205_1_);
-		return readStructure(compoundnbt);
+	private static StructureTemplate readStructure(InputStream stream) throws IOException {
+		CompoundTag tag = NbtIo.readCompressed(stream);
+		return readStructure(tag);
 	}
 
-	public static Template readStructure(CompoundNBT p_227458_1_) {
-		if (!p_227458_1_.contains("DataVersion", 99)) {
-			p_227458_1_.putInt("DataVersion", 500);
+	public static StructureTemplate readStructure(CompoundTag tag) {
+		if (!tag.contains("DataVersion", 99)) {
+			tag.putInt("DataVersion", 500);
 		}
 
-		Template template = new Template();
-		template.load(NBTUtil.update(DataFixesManager.getDataFixer(), DefaultTypeReferences.STRUCTURE, p_227458_1_, p_227458_1_.getInt("DataVersion")));
+		StructureTemplate template = new StructureTemplate();
+		template.load(NbtUtils.update(DataFixers.getDataFixer(), DataFixTypes.STRUCTURE, tag, tag.getInt("DataVersion")));
 		return template;
 	}
 

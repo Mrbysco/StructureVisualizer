@@ -4,41 +4,41 @@ import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import com.mrbysco.structurevisualizer.render.FakeWorld;
 import com.mrbysco.structurevisualizer.render.RenderHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ILiquidContainer;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.inventory.IClearable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.shapes.BitSetVoxelShapePart;
-import net.minecraft.util.math.shapes.VoxelShapePart;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.template.BlockIgnoreStructureProcessor;
-import net.minecraft.world.gen.feature.template.PlacementSettings;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Clearable;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlockContainer;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
+import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 
 import java.util.Iterator;
 import java.util.List;
 
 public class StructureRenderHelper {
-	public static final PlacementSettings PLACEMENT_SETTINGS = (new PlacementSettings()).setIgnoreEntities(true).addProcessor(BlockIgnoreStructureProcessor.STRUCTURE_BLOCK);
+	public static final StructurePlaceSettings PLACEMENT_SETTINGS = (new StructurePlaceSettings()).setIgnoreEntities(true).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
 
-	public static boolean initializeTemplateWorld(Template template, World world, BlockPos pos, BlockPos offPos, PlacementSettings placementSettings, int placeFlag) {
+	public static boolean initializeTemplateWorld(StructureTemplate template, Level world, BlockPos pos, BlockPos offPos, StructurePlaceSettings placementSettings, int placeFlag) {
 		RenderHandler.templateWorld = null;
 		if (template.palettes.isEmpty()) {
 			return false;
 		} else {
 			FakeWorld templateWorld = new FakeWorld(world);
-			List<Template.BlockInfo> list = placementSettings.getRandomPalette(template.palettes, pos).blocks();
+			List<StructureTemplate.StructureBlockInfo> list = placementSettings.getRandomPalette(template.palettes, pos).blocks();
 			if (!list.isEmpty() && template.size.getX() >= 1 && template.size.getY() >= 1 && template.size.getZ() >= 1) {
-				MutableBoundingBox mutableboundingbox = placementSettings.getBoundingBox();
+				BoundingBox boundingBox = placementSettings.getBoundingBox();
 				List<BlockPos> list1 = Lists.newArrayListWithCapacity(placementSettings.shouldKeepLiquids() ? list.size() : 0);
-				List<Pair<BlockPos, CompoundNBT>> list2 = Lists.newArrayListWithCapacity(list.size());
+				List<Pair<BlockPos, CompoundTag>> list2 = Lists.newArrayListWithCapacity(list.size());
 				int i = Integer.MAX_VALUE;
 				int j = Integer.MAX_VALUE;
 				int k = Integer.MAX_VALUE;
@@ -46,15 +46,15 @@ public class StructureRenderHelper {
 				int i1 = Integer.MIN_VALUE;
 				int j1 = Integer.MIN_VALUE;
 
-				for(Template.BlockInfo template$blockinfo : Template.processBlockInfos(templateWorld, pos, offPos, placementSettings, list, template)) {
+				for(StructureTemplate.StructureBlockInfo template$blockinfo : StructureTemplate.processBlockInfos(templateWorld, pos, offPos, placementSettings, list, template)) {
 					BlockPos blockpos = template$blockinfo.pos;
 					if((blockpos.getY() - pos.getY()) < RenderHandler.layer) {
-						if (mutableboundingbox == null || mutableboundingbox.isInside(blockpos)) {
+						if (boundingBox == null || boundingBox.isInside(blockpos)) {
 							FluidState fluidstate = placementSettings.shouldKeepLiquids() ? templateWorld.getFluidState(blockpos) : null;
 							BlockState blockstate = template$blockinfo.state.mirror(placementSettings.getMirror()).rotate(placementSettings.getRotation());
 							if (template$blockinfo.nbt != null) {
-								TileEntity tileentity = templateWorld.getBlockEntity(blockpos);
-								IClearable.tryClear(tileentity);
+								BlockEntity blockEntity = templateWorld.getBlockEntity(blockpos);
+								Clearable.tryClear(blockEntity);
 								templateWorld.setBlock(blockpos, Blocks.BARRIER.defaultBlockState(), 20);
 							}
 
@@ -67,8 +67,8 @@ public class StructureRenderHelper {
 								j1 = Math.max(j1, blockpos.getZ());
 								list2.add(Pair.of(blockpos, template$blockinfo.nbt));
 
-								if (fluidstate != null && blockstate.getBlock() instanceof ILiquidContainer) {
-									((ILiquidContainer)blockstate.getBlock()).placeLiquid(templateWorld, blockpos, blockstate, fluidstate);
+								if (fluidstate != null && blockstate.getBlock() instanceof LiquidBlockContainer) {
+									((LiquidBlockContainer)blockstate.getBlock()).placeLiquid(templateWorld, blockpos, blockstate, fluidstate);
 									if (!fluidstate.isSource()) {
 										list1.add(blockpos);
 									}
@@ -79,7 +79,7 @@ public class StructureRenderHelper {
 				}
 
 				boolean flag = true;
-				Direction[] adirection = new Direction[]{Direction.UP, Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+				Direction[] directions = new Direction[]{Direction.UP, Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 
 				while(flag && !list1.isEmpty()) {
 					flag = false;
@@ -90,8 +90,8 @@ public class StructureRenderHelper {
 						BlockPos blockpos3 = blockpos2;
 						FluidState fluidstate2 = templateWorld.getFluidState(blockpos2);
 
-						for(int k1 = 0; k1 < adirection.length && !fluidstate2.isSource(); ++k1) {
-							BlockPos blockpos1 = blockpos3.relative(adirection[k1]);
+						for(int k1 = 0; k1 < directions.length && !fluidstate2.isSource(); ++k1) {
+							BlockPos blockpos1 = blockpos3.relative(directions[k1]);
 							FluidState fluidstate1 = templateWorld.getFluidState(blockpos1);
 							if (fluidstate1.getHeight(templateWorld, blockpos1) > fluidstate2.getHeight(templateWorld, blockpos3) || fluidstate1.isSource() && !fluidstate2.isSource()) {
 								fluidstate2 = fluidstate1;
@@ -102,8 +102,8 @@ public class StructureRenderHelper {
 						if (fluidstate2.isSource()) {
 							BlockState blockstate2 = templateWorld.getBlockState(blockpos2);
 							Block block = blockstate2.getBlock();
-							if (block instanceof ILiquidContainer) {
-								((ILiquidContainer)block).placeLiquid(templateWorld, blockpos2, blockstate2, fluidstate2);
+							if (block instanceof LiquidBlockContainer) {
+								((LiquidBlockContainer)block).placeLiquid(templateWorld, blockpos2, blockstate2, fluidstate2);
 								flag = true;
 								iterator.remove();
 							}
@@ -113,29 +113,29 @@ public class StructureRenderHelper {
 
 				if (i <= l) {
 					if (!placementSettings.getKnownShape()) {
-						VoxelShapePart voxelshapepart = new BitSetVoxelShapePart(l - i + 1, i1 - j + 1, j1 - k + 1);
+						DiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(l - i + 1, i1 - j + 1, j1 - k + 1);
 						int l1 = i;
 						int i2 = j;
 						int j2 = k;
 
-						for(Pair<BlockPos, CompoundNBT> pair1 : list2) {
+						for(Pair<BlockPos, CompoundTag> pair1 : list2) {
 							BlockPos blockpos5 = pair1.getFirst();
-							voxelshapepart.setFull(blockpos5.getX() - l1, blockpos5.getY() - i2, blockpos5.getZ() - j2, true, true);
+							discreteVoxelShape.fill(blockpos5.getX() - l1, blockpos5.getY() - i2, blockpos5.getZ() - j2);
 						}
 
-						Template.updateShapeAtEdge(templateWorld, placeFlag, voxelshapepart, l1, i2, j2);
+						StructureTemplate.updateShapeAtEdge(templateWorld, placeFlag, discreteVoxelShape, l1, i2, j2);
 					}
 
-					for(Pair<BlockPos, CompoundNBT> pair : list2) {
-						BlockPos blockpos4 = pair.getFirst();
+					for(Pair<BlockPos, CompoundTag> pair : list2) {
+						BlockPos firstPos = pair.getFirst();
 						if (!placementSettings.getKnownShape()) {
-							BlockState blockstate1 = templateWorld.getBlockState(blockpos4);
-							BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate1, templateWorld, blockpos4);
-							if (blockstate1 != blockstate3) {
-								templateWorld.setBlock(blockpos4, blockstate3, placeFlag & -2 | 16);
+							BlockState state = templateWorld.getBlockState(firstPos);
+							BlockState updatedState = Block.updateFromNeighbourShapes(state, templateWorld, firstPos);
+							if (state != updatedState) {
+								templateWorld.setBlock(firstPos, updatedState, placeFlag & -2 | 16);
 							}
 
-							templateWorld.blockUpdated(blockpos4, blockstate3.getBlock());
+							templateWorld.blockUpdated(firstPos, updatedState.getBlock());
 						}
 					}
 				}

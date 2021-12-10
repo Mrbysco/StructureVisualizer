@@ -1,19 +1,22 @@
 package com.mrbysco.structurevisualizer.render;
 
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.lwjgl.opengl.GL11;
 
 public class CustomRenderType extends RenderType {
-	public CustomRenderType(String nameIn, VertexFormat formatIn, int drawModeIn, int bufferSizeIn, boolean useDelegateIn, boolean needsSortingIn, Runnable setupTaskIn, Runnable clearTaskIn) {
+	public CustomRenderType(String nameIn, VertexFormat formatIn, Mode drawModeIn, int bufferSizeIn, boolean useDelegateIn, boolean needsSortingIn, Runnable setupTaskIn, Runnable clearTaskIn) {
 		super(nameIn, formatIn, drawModeIn, bufferSizeIn, useDelegateIn, needsSortingIn, setupTaskIn, clearTaskIn);
 	}
 
 	public static final RenderType VISUAL_BLOCK = create("structurevisualizer:block",
-			DefaultVertexFormats.BLOCK, GL11.GL_QUADS, 256,
-			RenderType.State.builder()
-					.setShadeModelState(SMOOTH_SHADE)
+			DefaultVertexFormat.BLOCK, Mode.QUADS, 256, false, false,
+			RenderType.CompositeState.builder()
+//					.setShadeModelState(SMOOTH_SHADE)
+					.setShaderState(RenderStateShard.BLOCK_SHADER)
 					.setLightmapState(LIGHTMAP)
 					.setTextureState(BLOCK_SHEET_MIPPED)
 					.setLayeringState(VIEW_OFFSET_Z_LAYERING)
@@ -25,9 +28,10 @@ public class CustomRenderType extends RenderType {
 	);
 
 	public static final RenderType VISUAL_BLOCK_NO_DEPTH = create("structurevisualizer:block_no_depth",
-			DefaultVertexFormats.BLOCK, GL11.GL_QUADS, 256,
-			RenderType.State.builder()
-					.setShadeModelState(SMOOTH_SHADE)
+			DefaultVertexFormat.BLOCK, Mode.QUADS, 256, false, false,
+			RenderType.CompositeState.builder()
+//					.setShadeModelState(SMOOTH_SHADE)
+					.setShaderState(RenderStateShard.BLOCK_SHADER)
 					.setLightmapState(LIGHTMAP)
 					.setTextureState(BLOCK_SHEET_MIPPED)
 					.setLayeringState(VIEW_OFFSET_Z_LAYERING)
@@ -35,7 +39,7 @@ public class CustomRenderType extends RenderType {
 					.setDepthTestState(LEQUAL_DEPTH_TEST)
 					.setCullState(NO_CULL)
 					.setWriteMaskState(COLOR_WRITE)
-					.setAlphaState(MIDWAY_ALPHA)
+//					.setAlphaState(MIDWAY_ALPHA)
 					.createCompositeState(false)
 	);
 }
