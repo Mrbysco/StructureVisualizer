@@ -1,4 +1,4 @@
-[![build](https://github.com/Mrbysco/StructureVisualizer/actions/workflows/build.yml/badge.svg)](https://github.com/Mrbysco/StructureVisualizer/actions/workflows/build.yml) [![](http://cf.way2muchnoise.eu/versions/494857_latest.svg)](https://www.curseforge.com/minecraft/mc-mods/structure-visualizer)
+[![build](https://github.com/Mrbysco/StructureVisualizer/actions/workflows/build.yml/badge.svg)](https://github.com/Mrbysco/StructureVisualizer/actions/workflows/build.yml) [![](http://cf.way2muchnoise.eu/versions/494857.svg)](https://www.curseforge.com/minecraft/mc-mods/structure-visualizer)
 # Structure Visualizer #
 
 ## About ##
