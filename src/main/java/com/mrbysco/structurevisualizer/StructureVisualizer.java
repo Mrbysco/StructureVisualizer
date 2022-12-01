@@ -20,7 +20,6 @@ import java.io.IOException;
 @Mod(StructureVisualizer.MOD_ID)
 public class StructureVisualizer {
 	public static final String MOD_ID = "structurevisualizer";
-
 	public static final Logger LOGGER = LogManager.getLogger();
 	public static final File structureFolder = new File(FMLPaths.MODSDIR.get().toFile(), "/structures");
 	public static String structurePath = "";
