@@ -140,21 +140,15 @@ public class CustomBufferBuilder extends DefaultedVertexConsumer implements Buff
 		}
 	}
 
-	private IntConsumer intConsumer(VertexFormat.IndexType p_166778_) {
-		switch(p_166778_) {
+	private IntConsumer intConsumer(VertexFormat.IndexType indexType) {
+		switch (indexType) {
 			case BYTE:
-				return (p_166793_) -> {
-					this.buffer.put((byte)p_166793_);
-				};
+				return (p_166793_) -> this.buffer.put((byte) p_166793_);
 			case SHORT:
-				return (p_166791_) -> {
-					this.buffer.putShort((short)p_166791_);
-				};
+				return (p_166791_) -> this.buffer.putShort((short) p_166791_);
 			case INT:
 			default:
-				return (p_166789_) -> {
-					this.buffer.putInt(p_166789_);
-				};
+				return (p_166789_) -> this.buffer.putInt(p_166789_);
 		}
 	}
 
@@ -166,7 +160,7 @@ public class CustomBufferBuilder extends DefaultedVertexConsumer implements Buff
 		int l = this.vertices / this.mode.primitiveStride;
 		Vector3f[] avector3f = new Vector3f[l];
 
-		for(int i1 = 0; i1 < l; ++i1) {
+		for (int i1 = 0; i1 < l; ++i1) {
 			float f = floatbuffer.get(i + i1 * k + 0);
 			float f1 = floatbuffer.get(i + i1 * k + 1);
 			float f2 = floatbuffer.get(i + i1 * k + 2);
@@ -186,20 +180,18 @@ public class CustomBufferBuilder extends DefaultedVertexConsumer implements Buff
 		float[] afloat = new float[this.sortingPoints.length];
 		int[] aint = new int[this.sortingPoints.length];
 
-		for(int i = 0; i < this.sortingPoints.length; aint[i] = i++) {
+		for (int i = 0; i < this.sortingPoints.length; aint[i] = i++) {
 			float f = this.sortingPoints[i].x() - this.sortX;
 			float f1 = this.sortingPoints[i].y() - this.sortY;
 			float f2 = this.sortingPoints[i].z() - this.sortZ;
 			afloat[i] = f * f + f1 * f1 + f2 * f2;
 		}
 
-		IntArrays.mergeSort(aint, (p_166784_, p_166785_) -> {
-			return Floats.compare(afloat[p_166785_], afloat[p_166784_]);
-		});
+		IntArrays.mergeSort(aint, (p_166784_, p_166785_) -> Floats.compare(afloat[p_166785_], afloat[p_166784_]));
 		IntConsumer intconsumer = this.intConsumer(p_166787_);
 		this.buffer.position(this.nextElementByte);
 
-		for(int j : aint) {
+		for (int j : aint) {
 			intconsumer.accept(j * this.mode.primitiveStride + 0);
 			intconsumer.accept(j * this.mode.primitiveStride + 1);
 			intconsumer.accept(j * this.mode.primitiveStride + 2);
@@ -305,23 +297,23 @@ public class CustomBufferBuilder extends DefaultedVertexConsumer implements Buff
 			this.putFloat(0, p_85671_);
 			this.putFloat(4, p_85672_);
 			this.putFloat(8, p_85673_);
-			this.putByte(12, (byte)((int)(p_85674_ * 255.0F)));
-			this.putByte(13, (byte)((int)(p_85675_ * 255.0F)));
-			this.putByte(14, (byte)((int)(p_85676_ * 255.0F)));
-			this.putByte(15, (byte)((int)(p_85677_ * 255.0F)));
+			this.putByte(12, (byte) ((int) (p_85674_ * 255.0F)));
+			this.putByte(13, (byte) ((int) (p_85675_ * 255.0F)));
+			this.putByte(14, (byte) ((int) (p_85676_ * 255.0F)));
+			this.putByte(15, (byte) ((int) (p_85677_ * 255.0F)));
 			this.putFloat(16, p_85678_);
 			this.putFloat(20, p_85679_);
 			int i;
 			if (this.fullFormat) {
-				this.putShort(24, (short)(p_85680_ & '\uffff'));
-				this.putShort(26, (short)(p_85680_ >> 16 & '\uffff'));
+				this.putShort(24, (short) (p_85680_ & '\uffff'));
+				this.putShort(26, (short) (p_85680_ >> 16 & '\uffff'));
 				i = 28;
 			} else {
 				i = 24;
 			}
 
-			this.putShort(i + 0, (short)(p_85681_ & '\uffff'));
-			this.putShort(i + 2, (short)(p_85681_ >> 16 & '\uffff'));
+			this.putShort(i + 0, (short) (p_85681_ & '\uffff'));
+			this.putShort(i + 2, (short) (p_85681_ >> 16 & '\uffff'));
 			this.putByte(i + 4, BufferVertexConsumer.normalIntValue(p_85682_));
 			this.putByte(i + 5, BufferVertexConsumer.normalIntValue(p_85683_));
 			this.putByte(i + 6, BufferVertexConsumer.normalIntValue(p_85684_));

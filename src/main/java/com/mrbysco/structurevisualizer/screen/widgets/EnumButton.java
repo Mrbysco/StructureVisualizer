@@ -3,8 +3,6 @@ package com.mrbysco.structurevisualizer.screen.widgets;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.TextComponent;
 
-import net.minecraft.client.gui.components.Button.OnPress;
-
 public class EnumButton extends Button {
 	private Enum value;
 

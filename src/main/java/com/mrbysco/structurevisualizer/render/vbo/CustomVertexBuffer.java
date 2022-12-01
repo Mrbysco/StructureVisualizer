@@ -27,21 +27,13 @@ public class CustomVertexBuffer implements AutoCloseable {
 	private VertexFormat format;
 
 	public CustomVertexBuffer(VertexFormat vertexFormatIn) {
-		RenderSystem.glGenBuffers((p_85928_) -> {
-			this.vertextBufferId = p_85928_;
-		});
-		RenderSystem.glGenVertexArrays((p_166881_) -> {
-			this.arrayObjectId = p_166881_;
-		});
-		RenderSystem.glGenBuffers((p_166872_) -> {
-			this.indexBufferId = p_166872_;
-		});
+		RenderSystem.glGenBuffers((p_85928_) -> this.vertextBufferId = p_85928_);
+		RenderSystem.glGenVertexArrays((p_166881_) -> this.arrayObjectId = p_166881_);
+		RenderSystem.glGenBuffers((p_166872_) -> this.indexBufferId = p_166872_);
 	}
 
 	public void bind() {
-		RenderSystem.glBindBuffer(34962, () -> {
-			return this.vertextBufferId;
-		});
+		RenderSystem.glBindBuffer(34962, () -> this.vertextBufferId);
 		if (this.sequentialIndices) {
 			RenderSystem.glBindBuffer(34963, () -> {
 				RenderSystem.AutoStorageIndexBuffer rendersystem$autostorageindexbuffer = RenderSystem.getSequentialBuffer(this.mode, this.indexCount);
@@ -49,17 +41,13 @@ public class CustomVertexBuffer implements AutoCloseable {
 				return rendersystem$autostorageindexbuffer.name();
 			});
 		} else {
-			RenderSystem.glBindBuffer(34963, () -> {
-				return this.indexBufferId;
-			});
+			RenderSystem.glBindBuffer(34963, () -> this.indexBufferId);
 		}
 	}
 
 	public void upload(CustomBufferBuilder bufferBuilder) {
 		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> {
-				this.uploadRaw(bufferBuilder);
-			});
+			RenderSystem.recordRenderCall(() -> this.uploadRaw(bufferBuilder));
 		} else {
 			this.uploadRaw(bufferBuilder);
 		}
@@ -68,14 +56,10 @@ public class CustomVertexBuffer implements AutoCloseable {
 
 	public CompletableFuture<Void> uploadLater(CustomBufferBuilder bufferIn) {
 		if (!RenderSystem.isOnRenderThread()) {
-			return CompletableFuture.runAsync(() -> {
-				this.uploadRaw(bufferIn);
-			}, (p_166874_) -> {
-				RenderSystem.recordRenderCall(p_166874_::run);
-			});
+			return CompletableFuture.runAsync(() -> this.uploadRaw(bufferIn), (p_166874_) -> RenderSystem.recordRenderCall(p_166874_::run));
 		} else {
 			this.uploadRaw(bufferIn);
-			return CompletableFuture.completedFuture((Void)null);
+			return CompletableFuture.completedFuture((Void) null);
 		}
 	}
 
@@ -115,7 +99,7 @@ public class CustomVertexBuffer implements AutoCloseable {
 
 	public void draw(Matrix4f matrixIn, int modeIn) {
 		if (this.indexCount != 0) {
-			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+			RenderSystem.assertOnRenderThread();
 			this.bindVertexArray();
 			this.bind();
 			this.format.setupBufferState();
@@ -125,9 +109,7 @@ public class CustomVertexBuffer implements AutoCloseable {
 
 	public void drawWithShader(Matrix4f p_166868_, Matrix4f p_166869_, ShaderInstance p_166870_) {
 		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> {
-				this._drawWithShader(p_166868_.copy(), p_166869_.copy(), p_166870_);
-			});
+			RenderSystem.recordRenderCall(() -> this._drawWithShader(p_166868_.copy(), p_166869_.copy(), p_166870_));
 		} else {
 			this._drawWithShader(p_166868_, p_166869_, p_166870_);
 		}
@@ -135,10 +117,10 @@ public class CustomVertexBuffer implements AutoCloseable {
 
 	public void _drawWithShader(Matrix4f p_166877_, Matrix4f p_166878_, ShaderInstance p_166879_) {
 		if (this.indexCount != 0) {
-			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+			RenderSystem.assertOnRenderThread();
 			BufferUploader.reset();
 
-			for(int i = 0; i < 12; ++i) {
+			for (int i = 0; i < 12; ++i) {
 				int j = RenderSystem.getShaderTexture(i);
 				p_166879_.setSampler("Sampler" + i, j);
 			}
@@ -177,7 +159,7 @@ public class CustomVertexBuffer implements AutoCloseable {
 
 			if (p_166879_.SCREEN_SIZE != null) {
 				Window window = Minecraft.getInstance().getWindow();
-				p_166879_.SCREEN_SIZE.set((float)window.getWidth(), (float)window.getHeight());
+				p_166879_.SCREEN_SIZE.set((float) window.getWidth(), (float) window.getHeight());
 			}
 
 			if (p_166879_.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP)) {
@@ -199,7 +181,7 @@ public class CustomVertexBuffer implements AutoCloseable {
 
 	public void drawChunkLayer() {
 		if (this.indexCount != 0) {
-			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+			RenderSystem.assertOnRenderThread();
 			this.bindVertexArray();
 			this.bind();
 			this.format.setupBufferState();
@@ -208,24 +190,16 @@ public class CustomVertexBuffer implements AutoCloseable {
 	}
 
 	public static void unbind() {
-		RenderSystem.glBindBuffer(34962, () -> {
-			return 0;
-		});
-		RenderSystem.glBindBuffer(34963, () -> {
-			return 0;
-		});
+		RenderSystem.glBindBuffer(34962, () -> 0);
+		RenderSystem.glBindBuffer(34963, () -> 0);
 	}
 
 	private void bindVertexArray() {
-		RenderSystem.glBindVertexArray(() -> {
-			return this.arrayObjectId;
-		});
+		RenderSystem.glBindVertexArray(() -> this.arrayObjectId);
 	}
 
 	public static void unbindVertexArray() {
-		RenderSystem.glBindVertexArray(() -> {
-			return 0;
-		});
+		RenderSystem.glBindVertexArray(() -> 0);
 	}
 
 	public static void unbindBuffer() {

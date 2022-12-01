@@ -2,6 +2,7 @@ package com.mrbysco.structurevisualizer.render;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.MinecraftServer;
@@ -12,7 +13,6 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
@@ -34,6 +34,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -123,7 +124,7 @@ public class FakeWorld implements LevelAccessor {
 	}
 
 	@Override
-	public boolean removeBlock(BlockPos blockPos, boolean b) {
+	public boolean removeBlock(BlockPos blockPos, boolean moving) {
 		return removeOverride(blockPos);
 	}
 
@@ -133,7 +134,7 @@ public class FakeWorld implements LevelAccessor {
 	}
 
 	@Override
-	public boolean isFluidAtPosition(BlockPos p_151584_, Predicate<FluidState> p_151585_) {
+	public boolean isFluidAtPosition(BlockPos pos, Predicate<FluidState> fluidStatePredicate) {
 		return false;
 	}
 
@@ -144,13 +145,18 @@ public class FakeWorld implements LevelAccessor {
 	}
 
 	@Override
-	public TickList<Block> getBlockTicks() {
+	public long nextSubTickCount() {
+		return delegate.nextSubTickCount();
+	}
+
+	@Override
+	public LevelTickAccess<Block> getBlockTicks() {
 		return delegate.getBlockTicks();
 	}
 
 	@Override
-	public TickList<Fluid> getLiquidTicks() {
-		return delegate.getLiquidTicks();
+	public LevelTickAccess<Fluid> getFluidTicks() {
+		return delegate.getFluidTicks();
 	}
 
 	/**
@@ -214,12 +220,12 @@ public class FakeWorld implements LevelAccessor {
 	}
 
 	@Override
-	public Biome getBiome(BlockPos pos) {
+	public Holder<Biome> getBiome(BlockPos pos) {
 		return delegate.getBiome(pos);
 	}
 
 	@Override
-	public Biome getUncachedNoiseBiome(int x, int y, int z) {
+	public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
 		return null;
 	}
 
@@ -329,7 +335,7 @@ public class FakeWorld implements LevelAccessor {
 	@Override
 	public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
 		// adapted from World
-		return ! this.getBlockState(pos).isAir() && removeBlock(pos, true);
+		return !this.getBlockState(pos).isAir() && removeBlock(pos, true);
 	}
 
 	@Override

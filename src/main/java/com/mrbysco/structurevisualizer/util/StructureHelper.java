@@ -1,12 +1,12 @@
 package com.mrbysco.structurevisualizer.util;
 
 import com.mrbysco.structurevisualizer.StructureVisualizer;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 import javax.annotation.Nullable;
@@ -27,14 +27,14 @@ public class StructureHelper {
 
 	public static StructureTemplate loadFromDirectory(String structureName) {
 		String name;
-		if(structureName.endsWith(".nbt")) {
+		if (structureName.endsWith(".nbt")) {
 			name = structureName;
 		} else {
 			name = structureName + ".nbt";
 		}
 
 		File structureFile = getStructure(name);
-		if(structureFile != null) {
+		if (structureFile != null) {
 			Path path = createAndValidatePathToStructure(name);
 
 			try (InputStream inputstream = new FileInputStream(path.toFile())) {
@@ -89,7 +89,7 @@ public class StructureHelper {
 		List<File> fileList = new ArrayList<>();
 		File[] structureFiles = StructureVisualizer.structureFolder.listFiles((file, name) -> name.endsWith(".nbt"));
 
-		if(structureFiles != null) {
+		if (structureFiles != null) {
 			fileList = Arrays.asList(structureFiles);
 		}
 		return fileList;
@@ -100,7 +100,7 @@ public class StructureHelper {
 		File[] structureFiles = StructureVisualizer.structureFolder.listFiles((file, name) -> name.toLowerCase(Locale.ROOT).equals(structureName.toLowerCase(Locale.ROOT)));
 
 		File structureFile = null;
-		if(structureFiles.length > 0) {
+		if (structureFiles.length > 0) {
 			structureFile = structureFiles[0];
 		}
 		return structureFile;

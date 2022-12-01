@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -44,27 +44,29 @@ public class RenderHandler {
 	public static int layer = 0;
 
 	@SubscribeEvent
-	public void onRenderWorldLastEvent(RenderWorldLastEvent event) {
-		Player player = Minecraft.getInstance().player;
-		if( player == null )
-			return;
+	public void onRenderWorldLastEvent(RenderLevelStageEvent event) {
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+			Player player = Minecraft.getInstance().player;
+			if (player == null)
+				return;
 
-		if(renderStructure) {
-			if(templateWorld == null) {
-				cachedTemplateName = "";
-				cachedTemplate = null;
-				renderStructure = false;
-			} else {
-				final Minecraft minecraft = Minecraft.getInstance();
+			if (renderStructure) {
+				if (templateWorld == null) {
+					cachedTemplateName = "";
+					cachedTemplate = null;
+					renderStructure = false;
+				} else {
+					final Minecraft minecraft = Minecraft.getInstance();
 
-				final Vec3 cameraView = minecraft.gameRenderer.getMainCamera().getPosition();
-				PoseStack poseStack = event.getMatrixStack(); //Get current matrix position from the evt call
-				poseStack.pushPose();
-				poseStack.translate(-cameraView.x, -cameraView.y, -cameraView.z);
+					final Vec3 cameraView = minecraft.gameRenderer.getMainCamera().getPosition();
+					PoseStack poseStack = event.getPoseStack(); //Get current matrix position from the evt call
+					poseStack.pushPose();
+					poseStack.translate(-cameraView.x, -cameraView.y, -cameraView.z);
 
-				renderTemplate(poseStack, cameraView, player);
+					renderTemplate(poseStack, cameraView, player);
 
-				poseStack.popPose();
+					poseStack.popPose();
+				}
 			}
 		}
 	}
@@ -85,6 +87,7 @@ public class RenderHandler {
 
 			poseStack.translate(startPos.getX(), startPos.getY(), startPos.getZ());
 			renderBuffer.render(poseStack.last().pose()); //Actually draw whats in the buffer
+			System.out.println("Hey");
 			return;
 		}
 
@@ -109,7 +112,6 @@ public class RenderHandler {
 				BlockPos.MutableBlockPos mutablePos = targetPos.mutable();
 
 				stack.pushPose(); //Save position again
-				//matrix.translate(-startPos.getX(), -startPos.getY(), -startPos.getZ());
 				stack.translate(targetPos.getX(), targetPos.getY(), targetPos.getZ());
 
 				BakedModel blockModel = dispatcher.getBlockModel(state);
@@ -119,7 +121,7 @@ public class RenderHandler {
 				float f = (float) (color >> 16 & 255) / 255.0F;
 				float f1 = (float) (color >> 8 & 255) / 255.0F;
 				float f2 = (float) (color & 255) / 255.0F;
-				if(level.isEmptyBlock(targetPos)) {
+				if (level.isEmptyBlock(targetPos)) {
 					try {
 						if (state.getRenderShape() == RenderShape.MODEL) {
 							for (Direction direction : Direction.values()) {
@@ -156,15 +158,15 @@ public class RenderHandler {
 	}
 
 	public static void renderModelBrightnessColorQuads(PoseStack.Pose matrixEntry, VertexConsumer builder, float red, float green, float blue, float alpha, List<BakedQuad> listQuads, int combinedLightsIn, int combinedOverlayIn) {
-		for(BakedQuad bakedquad : listQuads) {
+		for (BakedQuad bakedquad : listQuads) {
 			float f;
 			float f1;
 			float f2;
 
 			if (bakedquad.isTinted()) {
-				f = red * 1f;
-				f1 = green * 1f;
-				f2 = blue * 1f;
+				f = red;
+				f1 = green;
+				f2 = blue;
 			} else {
 				f = 1f;
 				f1 = 1f;

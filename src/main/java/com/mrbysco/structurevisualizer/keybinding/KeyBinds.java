@@ -13,12 +13,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyBinds {
@@ -96,9 +95,11 @@ public class KeyBinds {
 	@SubscribeEvent
 	public void onKeyInput(KeyInputEvent event) {
 		final Minecraft minecraft = Minecraft.getInstance();
-		if(minecraft.screen != null && event.getAction() != GLFW.GLFW_PRESS)
+		if (minecraft.screen != null && event.getAction() != GLFW.GLFW_PRESS)
 
-		if (InputConstants.isKeyDown(minecraft.getWindow().getWindow(), 292)) { return; }
+			if (InputConstants.isKeyDown(minecraft.getWindow().getWindow(), 292)) {
+				return;
+			}
 
 		if (KEY_TOGGLE.consumeClick()) {
 			minecraft.setScreen(new TemplateSelectionScreen());
@@ -107,7 +108,7 @@ public class KeyBinds {
 		if (KEY_COORDINATE.consumeClick()) {
 			BlockPos pos = RenderHandler.position;
 			StructureTemplate template = RenderHandler.cachedTemplate;
-			if(pos != null && template != null) {
+			if (pos != null && template != null) {
 				pos = pos.offset((template.size.getX() / 2), 0, (template.size.getZ() / 2));
 
 				minecraft.player.sendMessage(new TranslatableComponent("structurevisualizer.coordinates",
@@ -117,7 +118,7 @@ public class KeyBinds {
 			}
 		}
 
-		if (KEY_X_DOWN.consumeClick()){
+		if (KEY_X_DOWN.consumeClick()) {
 			changePosition(minecraft, -1, 0, 0);
 		}
 		if (KEY_X_UP.consumeClick())
@@ -133,7 +134,7 @@ public class KeyBinds {
 			changePosition(minecraft, 0, 0, 1);
 
 		if (KEY_RENDER.consumeClick()) {
-			if(RenderHandler.templateWorld == null) {
+			if (RenderHandler.templateWorld == null) {
 				minecraft.player.sendMessage(new TranslatableComponent("structurevisualizer.render.fail"), Util.NIL_UUID);
 			} else {
 				RenderHandler.renderStructure = !RenderHandler.renderStructure;
@@ -149,11 +150,11 @@ public class KeyBinds {
 	}
 
 	public void layerDown(Minecraft minecraft) {
-		if(RenderHandler.cachedTemplate != null) {
+		if (RenderHandler.cachedTemplate != null) {
 			RenderHandler.renderBuffer = null;
 			RenderHandler.templateWorld = null;
 			int downLayer = RenderHandler.layer - 1;
-			if(downLayer == 0) {
+			if (downLayer == 0) {
 				RenderHandler.layer = RenderHandler.templateHeight;
 			} else {
 				RenderHandler.layer = downLayer;
@@ -165,11 +166,11 @@ public class KeyBinds {
 	}
 
 	public void layerUp(Minecraft minecraft) {
-		if(RenderHandler.cachedTemplate != null) {
+		if (RenderHandler.cachedTemplate != null) {
 			RenderHandler.renderBuffer = null;
 			RenderHandler.templateWorld = null;
 			int upLayer = RenderHandler.layer + 1;
-			if(upLayer > RenderHandler.templateHeight) {
+			if (upLayer > RenderHandler.templateHeight) {
 				RenderHandler.layer = 1;
 			} else {
 				RenderHandler.layer = upLayer;
@@ -181,12 +182,10 @@ public class KeyBinds {
 	}
 
 	public void changePosition(Minecraft minecraft, int x, int y, int z) {
-		if(RenderHandler.cachedTemplate != null) {
+		if (RenderHandler.cachedTemplate != null) {
 			RenderHandler.renderBuffer = null;
 			RenderHandler.templateWorld = null;
 			RenderHandler.position = RenderHandler.position.offset(x, y, z);
-
-			System.out.println(RenderHandler.position);
 
 			StructureRenderHelper.initializeTemplateWorld(RenderHandler.cachedTemplate, minecraft.level, RenderHandler.position, RenderHandler.position, RenderHandler.placementSettings, 2);
 		}

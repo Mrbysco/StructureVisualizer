@@ -5,9 +5,9 @@ import com.mrbysco.structurevisualizer.screen.TemplateSelectionScreen;
 import com.mrbysco.structurevisualizer.screen.widgets.StructureListWidget.ListEntry;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.TextComponent;
 
 public class StructureListWidget extends ObjectSelectionList<ListEntry> {
@@ -23,20 +23,18 @@ public class StructureListWidget extends ObjectSelectionList<ListEntry> {
 	}
 
 	@Override
-	protected int getScrollbarPosition()
-	{
+	protected int getScrollbarPosition() {
 		return this.listWidth;
 	}
 
 	@Override
-	public int getRowWidth()
-	{
+	public int getRowWidth() {
 		return this.listWidth;
 	}
 
 	public void refreshList() {
 		this.clearEntries();
-		parent.buildStructureList(this::addEntry, mod->new ListEntry(mod, this.parent));
+		parent.buildStructureList(this::addEntry, mod -> new ListEntry(mod, this.parent));
 	}
 
 	@Override
@@ -68,8 +66,7 @@ public class StructureListWidget extends ObjectSelectionList<ListEntry> {
 			return false;
 		}
 
-		public String getStructureName()
-		{
+		public String getStructureName() {
 			return structureName;
 		}
 

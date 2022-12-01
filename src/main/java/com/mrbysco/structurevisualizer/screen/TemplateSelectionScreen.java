@@ -86,9 +86,9 @@ public class TemplateSelectionScreen extends Screen {
 		int centerWidth = this.width / 2;
 
 		for (String structure : structures) {
-			listWidth = Math.max(listWidth,getFontRenderer().width(structure) + 10);
+			listWidth = Math.max(listWidth, getFontRenderer().width(structure) + 10);
 		}
-		listWidth = Math.max(Math.min(listWidth, width/3), 200);
+		listWidth = Math.max(Math.min(listWidth, width / 3), 200);
 		listWidth += listWidth % numButtons != 0 ? (numButtons - listWidth % numButtons) : 0;
 
 		int structureWidth = this.width - this.listWidth - (PADDING * 3);
@@ -111,10 +111,10 @@ public class TemplateSelectionScreen extends Screen {
 		y -= 18 + PADDING;
 		this.addRenderableWidget(this.loadButton = new Button(centerWidth - (doneButtonWidth / 2) + PADDING, y, doneButtonWidth, 20,
 				new TranslatableComponent("structurevisualizer.screen.selection.load"), b -> {
-			if(selected != null) {
+			if (selected != null) {
 				String selectedTemplate = selected.getStructureName();
 				StructureTemplate template = StructureHelper.loadFromDirectory(selectedTemplate);
-				if(template != null) {
+				if (template != null) {
 					RenderHandler.cachedTemplateName = selectedTemplate.toLowerCase(Locale.ROOT);
 					RenderHandler.cachedTemplate = template;
 					RenderHandler.templateHeight = template.size.getY();
@@ -151,7 +151,7 @@ public class TemplateSelectionScreen extends Screen {
 		search.setCanLoseFocus(true);
 
 		BlockPos pos = BlockPos.ZERO;
-		if(minecraft.player != null) {
+		if (minecraft.player != null) {
 			pos = minecraft.player.blockPosition();
 		}
 
@@ -186,7 +186,7 @@ public class TemplateSelectionScreen extends Screen {
 		final int width = listWidth / numButtons;
 		int x = centerWidth + PADDING - width;
 		this.addRenderableWidget(mirrorButton = new EnumButton(x - (120 + 2), PADDING, 120, 20, Mirror.NONE, b -> {
-			Mirror mirror = (Mirror) ((EnumButton)b).getValue();
+			Mirror mirror = (Mirror) ((EnumButton) b).getValue();
 
 			int index = mirror.ordinal();
 			int nextIndex = index + 1;
@@ -194,7 +194,7 @@ public class TemplateSelectionScreen extends Screen {
 			nextIndex %= values.length;
 
 			mirror = values[nextIndex];
-			((EnumButton)b).setValue(mirror);
+			((EnumButton) b).setValue(mirror);
 
 			placementSettings.setMirror(mirror);
 		}));
@@ -204,7 +204,7 @@ public class TemplateSelectionScreen extends Screen {
 		this.addRenderableWidget(SortType.Z_TO_A.button = new Button(x, PADDING, width - buttonMargin, 20, SortType.Z_TO_A.getButtonText(), b -> resortStructures(SortType.Z_TO_A)));
 		x += width + buttonMargin;
 		this.addRenderableWidget(rotationButton = new EnumButton(x, PADDING, 120, 20, Rotation.NONE, b -> {
-			Rotation rotation = (Rotation) ((EnumButton)b).getValue();
+			Rotation rotation = (Rotation) ((EnumButton) b).getValue();
 
 			int index = rotation.ordinal();
 			int nextIndex = index + 1;
@@ -212,7 +212,7 @@ public class TemplateSelectionScreen extends Screen {
 			nextIndex %= rotations.length;
 
 			rotation = rotations[nextIndex];
-			((EnumButton)b).setValue(rotation);
+			((EnumButton) b).setValue(rotation);
 
 			placementSettings.setRotation(rotation);
 		}));
@@ -236,9 +236,9 @@ public class TemplateSelectionScreen extends Screen {
 
 		if (!sorted) {
 			reloadStructures();
-			if(sortType == SortType.A_TO_Z) {
+			if (sortType == SortType.A_TO_Z) {
 				Collections.sort(structures);
-			} else if(sortType == SortType.Z_TO_A) {
+			} else if (sortType == SortType.Z_TO_A) {
 				structures.sort(Collections.reverseOrder());
 			}
 			structureList.refreshList();
@@ -251,7 +251,7 @@ public class TemplateSelectionScreen extends Screen {
 	}
 
 	public <T extends ObjectSelectionList.Entry<T>> void buildStructureList(Consumer<T> ListViewConsumer, Function<String, T> newEntry) {
-		structures.forEach(mod->ListViewConsumer.accept(newEntry.apply(mod)));
+		structures.forEach(mod -> ListViewConsumer.accept(newEntry.apply(mod)));
 	}
 
 	private void reloadStructures() {
@@ -326,7 +326,7 @@ public class TemplateSelectionScreen extends Screen {
 	}
 
 	protected boolean isHovering(int x, int y, int width, int height, double mouseX, double mouseY) {
-		return mouseX >= (double)(x - 1) && mouseX < (double)(x + width + 1) && mouseY >= (double)(y - 1) && mouseY < (double)(y + height + 1);
+		return mouseX >= (double) (x - 1) && mouseX < (double) (x + width + 1) && mouseY >= (double) (y - 1) && mouseY < (double) (y + height + 1);
 	}
 
 	public Font getFontRenderer() {

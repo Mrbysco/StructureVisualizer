@@ -39,6 +39,6 @@ public class NumberFieldWidget extends EditBox {
 	}
 
 	private boolean isNumeric(String value) {
-		return NumberUtils.isParsable(value) && getDouble() == (int)getDouble();
+		return NumberUtils.isParsable(value) && getDouble() == (int) getDouble();
 	}
 }
