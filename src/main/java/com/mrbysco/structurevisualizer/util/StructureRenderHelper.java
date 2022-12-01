@@ -2,7 +2,7 @@ package com.mrbysco.structurevisualizer.util;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
-import com.mrbysco.structurevisualizer.render.FakeWorld;
+import com.mrbysco.structurevisualizer.render.FakeLevel;
 import com.mrbysco.structurevisualizer.render.RenderHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -33,7 +33,7 @@ public class StructureRenderHelper {
 		if (template.palettes.isEmpty()) {
 			return false;
 		} else {
-			FakeWorld templateWorld = new FakeWorld(world);
+			FakeLevel templateWorld = new FakeLevel(world);
 			List<StructureTemplate.StructureBlockInfo> list = placementSettings.getRandomPalette(template.palettes, pos).blocks();
 			if (!list.isEmpty() && template.size.getX() >= 1 && template.size.getY() >= 1 && template.size.getZ() >= 1) {
 				BoundingBox boundingBox = placementSettings.getBoundingBox();

@@ -50,11 +50,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class FakeWorld implements LevelAccessor {
+public class FakeLevel implements LevelAccessor {
 	private final LevelAccessor delegate;
 	private final Map<BlockPos, BlockState> posToBlock;
 
-	public FakeWorld(LevelAccessor delegate) {
+	public FakeLevel(LevelAccessor delegate) {
 		this.delegate = Objects.requireNonNull(delegate);
 		posToBlock = new HashMap<>();
 	}

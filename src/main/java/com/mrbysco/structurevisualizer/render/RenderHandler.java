@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,36 +38,34 @@ public class RenderHandler {
 	public static String cachedTemplateName = "";
 	public static StructureTemplate cachedTemplate = null;
 	public static boolean renderStructure = false;
-	public static FakeWorld templateWorld = null;
+	public static FakeLevel templateWorld = null;
 	public static BlockPos position = BlockPos.ZERO;
 	public static StructurePlaceSettings placementSettings = StructureRenderHelper.PLACEMENT_SETTINGS;
 	public static int templateHeight = 0;
 	public static int layer = 0;
 
 	@SubscribeEvent
-	public void onRenderWorldLastEvent(RenderLevelStageEvent event) {
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
-			Player player = Minecraft.getInstance().player;
-			if (player == null)
-				return;
+	public void onRenderWorldLastEvent(RenderLevelLastEvent event) {
+		Player player = Minecraft.getInstance().player;
+		if (player == null)
+			return;
 
-			if (renderStructure) {
-				if (templateWorld == null) {
-					cachedTemplateName = "";
-					cachedTemplate = null;
-					renderStructure = false;
-				} else {
-					final Minecraft minecraft = Minecraft.getInstance();
+		if (renderStructure) {
+			if (templateWorld == null) {
+				cachedTemplateName = "";
+				cachedTemplate = null;
+				renderStructure = false;
+			} else {
+				final Minecraft minecraft = Minecraft.getInstance();
 
-					final Vec3 cameraView = minecraft.gameRenderer.getMainCamera().getPosition();
-					PoseStack poseStack = event.getPoseStack(); //Get current matrix position from the evt call
-					poseStack.pushPose();
-					poseStack.translate(-cameraView.x, -cameraView.y, -cameraView.z);
+				final Vec3 cameraView = minecraft.gameRenderer.getMainCamera().getPosition();
+				PoseStack poseStack = event.getPoseStack(); //Get current matrix position from the evt call
+				poseStack.pushPose();
+				poseStack.translate(-cameraView.x, -cameraView.y, -cameraView.z);
 
-					renderTemplate(poseStack, cameraView, player);
+				renderTemplate(poseStack, cameraView, player);
 
-					poseStack.popPose();
-				}
+				poseStack.popPose();
 			}
 		}
 	}
@@ -77,17 +76,16 @@ public class RenderHandler {
 		if (renderBuffer != null && tickTrack < 300) {
 			if (tickTrack % 30 == 0) {
 				try {
-					Vec3 projectedView2 = cameraView;
-					Vec3 startPosView = new Vec3(startPos.getX(), startPos.getY(), startPos.getZ());
-					projectedView2 = projectedView2.subtract(startPosView);
-					renderBuffer.sort((float) projectedView2.x(), (float) projectedView2.y(), (float) projectedView2.z());
+//					Vec3 projectedView2 = cameraView;
+//					Vec3 startPosView = new Vec3(startPos.getX(), startPos.getY(), startPos.getZ());
+//					projectedView2 = projectedView2.subtract(startPosView);
+//					renderBuffer.sort((float) projectedView2.x(), (float) projectedView2.y(), (float) projectedView2.z());
 				} catch (Exception ignored) {
 				}
 			}
 
 			poseStack.translate(startPos.getX(), startPos.getY(), startPos.getZ());
 			renderBuffer.render(poseStack.last().pose()); //Actually draw whats in the buffer
-			System.out.println("Hey");
 			return;
 		}
 
@@ -149,10 +147,10 @@ public class RenderHandler {
 			stack.popPose(); //Load after loop
 		});
 
-		Vec3 projectedView2 = minecraft.gameRenderer.getMainCamera().getPosition();
-		Vec3 startPosView = new Vec3(startPos.getX(), startPos.getY(), startPos.getZ());
-		projectedView2 = projectedView2.subtract(startPosView);
-		renderBuffer.sort((float) projectedView2.x(), (float) projectedView2.y(), (float) projectedView2.z());
+//		Vec3 projectedView2 = minecraft.gameRenderer.getMainCamera().getPosition();
+//		Vec3 startPosView = new Vec3(startPos.getX(), startPos.getY(), startPos.getZ());
+//		projectedView2 = projectedView2.subtract(startPosView);
+//		renderBuffer.sort((float) projectedView2.x(), (float) projectedView2.y(), (float) projectedView2.z());
 		poseStack.translate(startPos.getX(), startPos.getY(), startPos.getZ());
 		renderBuffer.render(poseStack.last().pose()); //Actually draw whats in the buffer
 	}

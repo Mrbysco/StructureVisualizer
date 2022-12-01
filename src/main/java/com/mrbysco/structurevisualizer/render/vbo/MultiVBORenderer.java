@@ -2,9 +2,11 @@ package com.mrbysco.structurevisualizer.render.vbo;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.math.Matrix4f;
-import com.mrbysco.structurevisualizer.render.vbo.CustomBufferBuilder.SortState;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 
@@ -22,24 +24,23 @@ public class MultiVBORenderer implements Closeable {
 	private static final int BUFFER_SIZE = 2 * 1024 * 1024 * 3;
 
 	public static MultiVBORenderer of(Consumer<MultiBufferSource> vertexProducer) {
-		final Map<RenderType, CustomBufferBuilder> builders = Maps.newHashMap();
+		final Map<RenderType, BufferBuilder> builders = Maps.newHashMap();
 
 		vertexProducer.accept(rt -> builders.computeIfAbsent(rt, (_rt) -> {
-			CustomBufferBuilder builder = new CustomBufferBuilder(BUFFER_SIZE);
+			BufferBuilder builder = new BufferBuilder(BUFFER_SIZE);
 			builder.begin(_rt.mode(), _rt.format());
 
 			return builder;
 		}));
 
-		Map<RenderType, CustomBufferBuilder.SortState> sortCaches = Maps.newHashMap();
-		Map<RenderType, CustomVertexBuffer> buffers = Maps.transformEntries(builders, (rt, builder) -> {
+		Map<RenderType, BufferBuilder.SortState> sortCaches = Maps.newHashMap();
+		Map<RenderType, VertexBuffer> buffers = Maps.transformEntries(builders, (rt, builder) -> {
 			Objects.requireNonNull(rt);
 			Objects.requireNonNull(builder);
 			sortCaches.put(rt, builder.getSortState());
 
 			builder.end();
-			VertexFormat fmt = rt.format();
-			CustomVertexBuffer vbo = new CustomVertexBuffer(fmt);
+			VertexBuffer vbo = new VertexBuffer();
 
 			vbo.upload(builder);
 			return vbo;
@@ -48,44 +49,52 @@ public class MultiVBORenderer implements Closeable {
 		return new MultiVBORenderer(buffers, sortCaches);
 	}
 
-	private final ImmutableMap<RenderType, CustomVertexBuffer> buffers;
-	private final ImmutableMap<RenderType, CustomBufferBuilder.SortState> sortCaches;
+	private final ImmutableMap<RenderType, VertexBuffer> buffers;
+	private final ImmutableMap<RenderType, BufferBuilder.SortState> sortCaches;
 
-	protected MultiVBORenderer(Map<RenderType, CustomVertexBuffer> buffers, Map<RenderType, CustomBufferBuilder.SortState> sortCaches) {
+	protected MultiVBORenderer(Map<RenderType, VertexBuffer> buffers, Map<RenderType, BufferBuilder.SortState> sortCaches) {
 		this.buffers = ImmutableMap.copyOf(buffers);
 		this.sortCaches = ImmutableMap.copyOf(sortCaches);
 	}
 
 	public void sort(float x, float y, float z) {
-		for (Map.Entry<RenderType, CustomBufferBuilder.SortState> renderTypeSortStateEntry : sortCaches.entrySet()) {
-			RenderType renderType = renderTypeSortStateEntry.getKey();
-			CustomBufferBuilder.SortState state = renderTypeSortStateEntry.getValue();
-			CustomBufferBuilder builder = new CustomBufferBuilder(BUFFER_SIZE);
-			builder.begin(renderType.mode(), renderType.format());
-
-
-			builder.restoreSortState(new SortState(state.mode, state.vertices, state.sortingPoints, x, y, z));
-			builder.end();
-
-			CustomVertexBuffer vbo = buffers.get(renderType);
-			vbo.upload(builder);
-		}
+//		for (Map.Entry<RenderType, BufferBuilder.SortState> renderTypeSortStateEntry : sortCaches.entrySet()) {
+//			RenderType renderType = renderTypeSortStateEntry.getKey();
+//			BufferBuilder.SortState state = renderTypeSortStateEntry.getValue();
+//			BufferBuilder builder = new BufferBuilder(BUFFER_SIZE);
+//			builder.begin(renderType.mode(), renderType.format());
+//
+//
+//			builder.restoreSortState(new SortState(state.mode, state.vertices, state.sortingPoints, x, y, z));
+//			builder.end();
+//
+//			VertexBuffer vbo = buffers.get(renderType);
+//			vbo.upload(builder);
+//		}
 	}
 
 	public void render(Matrix4f matrix) {
 		buffers.forEach((rt, vbo) -> {
+			RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+
 			rt.setupRenderState();
 			vbo.bind();
-			vbo.drawChunkLayer();
-
-			CustomVertexBuffer.unbind();
-			CustomVertexBuffer.unbindVertexArray();
-
+			vbo.drawWithShader(matrix, RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
 			rt.clearRenderState();
+
+//
+//			rt.setupRenderState();
+//			vbo.bind();
+//			vbo.drawChunkLayer();
+//
+//			VertexBuffer.unbind();
+//			VertexBuffer.unbindVertexArray();
+//
+//			rt.clearRenderState();
 		});
 	}
 
 	public void close() {
-		buffers.values().forEach(CustomVertexBuffer::close);
+		buffers.values().forEach(VertexBuffer::close);
 	}
 }
