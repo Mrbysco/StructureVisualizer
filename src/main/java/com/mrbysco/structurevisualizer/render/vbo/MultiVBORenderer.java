@@ -37,7 +37,7 @@ public class MultiVBORenderer implements Closeable {
 		Map<RenderType, VertexBuffer> buffers = Maps.transformEntries(builders, (rt, builder) -> {
 			Objects.requireNonNull(rt);
 			Objects.requireNonNull(builder);
-			sortCaches.put(rt, builder.getSortState());
+//			sortCaches.put(rt, builder.getSortState());
 
 			builder.end();
 			VertexBuffer vbo = new VertexBuffer();
@@ -57,6 +57,7 @@ public class MultiVBORenderer implements Closeable {
 		this.sortCaches = ImmutableMap.copyOf(sortCaches);
 	}
 
+	//Maybe one day
 	public void sort(float x, float y, float z) {
 //		for (Map.Entry<RenderType, BufferBuilder.SortState> renderTypeSortStateEntry : sortCaches.entrySet()) {
 //			RenderType renderType = renderTypeSortStateEntry.getKey();
@@ -80,17 +81,11 @@ public class MultiVBORenderer implements Closeable {
 			rt.setupRenderState();
 			vbo.bind();
 			vbo.drawWithShader(matrix, RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
-			rt.clearRenderState();
 
-//
-//			rt.setupRenderState();
-//			vbo.bind();
-//			vbo.drawChunkLayer();
-//
 //			VertexBuffer.unbind();
 //			VertexBuffer.unbindVertexArray();
-//
-//			rt.clearRenderState();
+
+			rt.clearRenderState();
 		});
 	}
 
